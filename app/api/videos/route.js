@@ -1,63 +1,74 @@
-import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
+import cloudinary from "@/lib/cloudinary";
+import connectDB from "@/lib/db";
+import Video from "@/models/Video";
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+export const runtime = "nodejs";
 
+/* =========================
+   POST: Upload video
+========================= */
 export async function POST(req) {
   try {
-    // parse FormData from request
+    await connectDB();
+
     const formData = await req.formData();
+
     const file = formData.get("file");
     const title = formData.get("title");
     const description = formData.get("description");
 
     if (!file || !title || !description) {
       return NextResponse.json(
-        { error: "File, title, and description are required" },
+        { error: "All fields are required" },
         { status: 400 }
       );
     }
 
-    // Convert file to buffer for Cloudinary
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload_stream(
-      { resource_type: "video", folder: "videos" },
-      (error, result) => {
-        if (error) {
-          console.error("Cloudinary upload error:", error);
-          return NextResponse.json(
-            { error: "Cloudinary upload failed" },
-            { status: 500 }
-          );
-        }
-        return result;
-      }
-    );
-
-    // Use a Promise wrapper because upload_stream uses callbacks
+    // Upload to Cloudinary (VIDEO)
     const uploadResult = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { resource_type: "video", folder: "videos" },
+      cloudinary.uploader.upload_stream(
+        {
+          resource_type: "video",
+          folder: "social-media/videos",
+        },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) reject(error);
           resolve(result);
         }
-      );
-      stream.end(buffer);
+      ).end(buffer);
     });
 
-    // Return JSON response
-    return NextResponse.json({ success: true, data: uploadResult });
-  } catch (err) {
-    console.error("Upload error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    // Auto thumbnail from video
+    const thumbnailUrl = cloudinary.url(uploadResult.public_id, {
+      resource_type: "video",
+      format: "jpg",
+      transformation: [
+        { width: 400, height: 225, crop: "fill" },
+        { start_offset: "auto" },
+      ],
+    });
+
+    // Save in MongoDB
+    const newVideo = await Video.create({
+      title,
+      description,
+      videoUrl: uploadResult.secure_url,
+      thumbnailUrl,
+      controls: true,
+    });
+
+    return NextResponse.json(newVideo, { status: 201 });
+
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Upload failed" },
+      { status: 500 }
+    );
   }
 }
