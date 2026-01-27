@@ -1,15 +1,9 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Alert,
-} from "@mui/material";
+import { useRouter } from "next/navigation";
+import { TextField, Button, Box, Typography, Alert } from "@mui/material";
 
 export default function Register() {
   const router = useRouter();
@@ -29,10 +23,10 @@ export default function Register() {
       return;
     }
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const res = await fetch("/api/auth/register", {
+    try {
+      const res = await fetch("/api/auth/register", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -41,13 +35,15 @@ export default function Register() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.message || "Registration failed");
+        setError(data?.error || "Registration failed");
         return;
       }
 
+      // Success → redirect to login
       router.push("/login");
     } catch (err) {
-      setError("Failed to fetch data");
+      console.error(err);
+      setError("Registration failed");
     } finally {
       setLoading(false);
     }
@@ -62,74 +58,23 @@ export default function Register() {
         justifyContent: "center",
       }}
     >
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          width: 350,
-          p: 4,
-          boxShadow: 3,
-          borderRadius: 2,
-        }}
-      >
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: 350, p: 4, boxShadow: 3, borderRadius: 2 }}>
         <Typography variant="h5" mb={2} textAlign="center">
           Register
         </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <TextField label="Email" type="email" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <TextField label="Confirm Password" type="password" fullWidth margin="normal" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
 
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <TextField
-          label="Confirm Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          sx={{ mt: 2 }}
-          disabled={loading}
-        >
+        <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </Button>
 
         <Typography variant="body2" textAlign="center" mt={2}>
-          Already have an account?{" "}
-          <Button
-            variant="text"
-            onClick={() => router.push("/login")}
-          >
-            Login
-          </Button>
+          Already have an account? <Button variant="text" onClick={() => router.push("/login")}>Login</Button>
         </Typography>
       </Box>
     </Box>

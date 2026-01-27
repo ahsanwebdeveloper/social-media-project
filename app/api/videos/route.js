@@ -1,60 +1,63 @@
+import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "../../../lib/db";
-import Video from "@models/Video"
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
+export async function POST(req) {
+  try {
+    // parse FormData from request
+    const formData = await req.formData();
+    const file = formData.get("file");
+    const title = formData.get("title");
+    const description = formData.get("description");
 
-export async function GET(){
-    try{
-        await connectToDatabase()
-        const videos = await Video.find({}).sort({createdAt : -1}).lean()
-        if(!videos || videos.lenght === 0){
-            return NextResponse.json([], {status:200})
-        }
-        return NextResponse.json(videos)
-    } catch(error){
-       return NextResponse.json(
-            {error :"failed to fatch video"},
-            {status : 200}
-        )
-
+    if (!file || !title || !description) {
+      return NextResponse.json(
+        { error: "File, title, and description are required" },
+        { status: 400 }
+      );
     }
-}
-export async function POST(request){
-    try{
-        const session = await getServerSession(authOptions)
-        if(!session){
-            return NextResponse.json(
-                {error : "Unauthorized"},
-                {status:401}
-            )
-        }
-        await connectToDatabase()
-       const body = await request.json() 
-       if(!body.title || !body.description || !body.videoUrl || !body.thubmnailUrl) {
-        return NextResponse.json(
-                {error : "Missing requird fields"},
-                {status:400}
-            );
-       }
-       const videoData = {
-        ...body,
-        controls :body.controls ?? true,
-        transformation :{
-            height :1920,
-            width :1080,
-            quailty : body.transformation?.quailty ?? 100
-        } 
-       }
-        const newVideo = await Video.create(videoData)
-        return NextResponse.json(newVideo)
 
-    } catch(error){
-        return NextResponse.json(
-            {error:"failed to create a video"},
-            {status:200}
-        )
-    }
+    // Convert file to buffer for Cloudinary
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload_stream(
+      { resource_type: "video", folder: "videos" },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload error:", error);
+          return NextResponse.json(
+            { error: "Cloudinary upload failed" },
+            { status: 500 }
+          );
+        }
+        return result;
+      }
+    );
+
+    // Use a Promise wrapper because upload_stream uses callbacks
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "video", folder: "videos" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      stream.end(buffer);
+    });
+
+    // Return JSON response
+    return NextResponse.json({ success: true, data: uploadResult });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

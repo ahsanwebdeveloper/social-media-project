@@ -1,18 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Alert,
-} from "@mui/material";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,29 +15,23 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    try {
-      setLoading(true);
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    setLoading(false);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.message || "Invalid email or password");
-        return;
-      }
-
-      router.push("/");
-    } catch (err) {
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
+    if (res?.error) {
+      setError(res.error); 
+      return;
     }
+
+    // Successful login
+    router.push("/");
   };
 
   return (
@@ -58,12 +46,7 @@ export default function Login() {
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={{
-          width: 350,
-          p: 4,
-          boxShadow: 3,
-          borderRadius: 2,
-        }}
+        sx={{ width: 350, p: 4, boxShadow: 3, borderRadius: 2 }}
       >
         <Typography variant="h5" mb={2} textAlign="center">
           Login
@@ -104,15 +87,8 @@ export default function Login() {
         >
           {loading ? "Logging in..." : "Login"}
         </Button>
-
         <Typography variant="body2" textAlign="center" mt={2}>
-          Don&apos;t have an account?{" "}
-          <Button
-            variant="text"
-            onClick={() => router.push("/register")}
-          >
-            Register
-          </Button>
+          If you are new please register <Button variant="text" onClick={() => router.push("/register")}>Register</Button>
         </Typography>
       </Box>
     </Box>
