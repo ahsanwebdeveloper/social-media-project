@@ -1,4 +1,4 @@
-"use client"; // VERY IMPORTANT — this makes it a client component
+"use client"; 
 
 import Providers from "./Providers";
 import Header from "./Header";

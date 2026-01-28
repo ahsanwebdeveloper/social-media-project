@@ -1,74 +1,50 @@
-import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
-import connectDB from "@/lib/db";
-import Video from "@/models/Video";
+import { connectToDatabase } from "@/lib/db";
+import Video from "@/models/video";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export const runtime = "nodejs";
-
-/* =========================
-   POST: Upload video
-========================= */
-export async function POST(req) {
+export async function GET() {
   try {
-    await connectDB();
+    await connectToDatabase();
+    const videos = await Video.find({}).sort({ createdAt: -1 }); // newest first
+    return new Response(JSON.stringify(videos), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
 
-    const formData = await req.formData();
+export async function POST(req) {
+  const session = await getServerSession(authOptions);
+  if (!session)
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
-    const file = formData.get("file");
-    const title = formData.get("title");
-    const description = formData.get("description");
+  try {
+    await connectToDatabase();
 
-    if (!file || !title || !description) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
+    const { title, description, videoUrl, thumbnailUrl } = await req.json();
+
+    if (!title || !description || !videoUrl || !thumbnailUrl) {
+      return new Response(JSON.stringify({ error: "All fields are required" }), { status: 400 });
     }
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Upload to Cloudinary (VIDEO)
-    const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          resource_type: "video",
-          folder: "social-media/videos",
-        },
-        (error, result) => {
-          if (error) reject(error);
-          resolve(result);
-        }
-      ).end(buffer);
-    });
-
-    // Auto thumbnail from video
-    const thumbnailUrl = cloudinary.url(uploadResult.public_id, {
-      resource_type: "video",
-      format: "jpg",
-      transformation: [
-        { width: 400, height: 225, crop: "fill" },
-        { start_offset: "auto" },
-      ],
-    });
-
-    // Save in MongoDB
-    const newVideo = await Video.create({
+    const video = await Video.create({
       title,
       description,
-      videoUrl: uploadResult.secure_url,
+      videoUrl,
       thumbnailUrl,
-      controls: true,
+      userId: session.user.id,
     });
 
-    return NextResponse.json(newVideo, { status: 201 });
-
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify(video), { status: 201 });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }

@@ -1,40 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { uploadToCloudinary } from "@/lib/cloudinaryUpload";
 
 export default function FileUpload({ onSuccess }) {
-  const [file, setFile] = useState(null);
+  const videoInputRef = useRef(null);
+  const thumbInputRef = useRef(null);
+
+  const [video, setVideo] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleUpload = async () => {
-    if (!file || !title || !description) {
+    console.log({ video, thumbnail, title, description });
+
+    if (!video || !thumbnail || !title || !description) {
       setError("All fields are required");
       return;
     }
 
-    setLoading(true);
-    setError("");
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-
     try {
-      const res = await fetch("/api/video", {
+      setLoading(true);
+      setError("");
+
+      const videoRes = await uploadToCloudinary(video, "video");
+      const thumbRes = await uploadToCloudinary(thumbnail, "image");
+
+      const res = await fetch("/api/videos", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          videoUrl: videoRes.secure_url,
+          thumbnailUrl: thumbRes.secure_url,
+        }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-
-      onSuccess && onSuccess(data);
-      alert("Upload successful!");
+      onSuccess(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,37 +61,80 @@ export default function FileUpload({ onSuccess }) {
   };
 
   return (
-    <div className="space-y-4 max-w-md mx-auto p-4 border rounded shadow">
-      {error && <p className="text-red-500">{error}</p>}
+    <Paper elevation={4} sx={{ maxWidth: 500, mx: "auto", p: 4 }}>
+      <Typography variant="h5" mb={2} textAlign="center">
+        Upload Video
+      </Typography>
 
-      <input
-        type="text"
-        placeholder="Video Title"
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      <TextField
+        label="Title"
+        fullWidth
+        sx={{ mb: 2 }}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full p-2 border rounded"
       />
 
-      <textarea
-        placeholder="Video Description"
+      <TextField
+        label="Description"
+        fullWidth
+        multiline
+        rows={3}
+        sx={{ mb: 2 }}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        className="w-full p-2 border rounded"
       />
 
       <input
+        ref={videoInputRef}
         type="file"
         accept="video/*"
-        onChange={(e) => setFile(e.target.files[0])}
+        hidden
+        onChange={(e) => setVideo(e.target.files[0])}
       />
 
-      <button
-        disabled={loading}
-        onClick={handleUpload}
-        className="w-full bg-blue-500 text-white p-2 rounded"
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => videoInputRef.current.click()}
       >
-        {loading ? "Uploading..." : "Upload Video"}
-      </button>
-    </div>
+        Select Video
+      </Button>
+
+      {video && <Typography variant="caption"> {video.name}</Typography>}
+
+      <input
+        ref={thumbInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => setThumbnail(e.target.files[0])}
+      />
+
+      <Button
+        variant="outlined"
+        fullWidth
+        sx={{ mt: 2 }}
+        onClick={() => thumbInputRef.current.click()}
+      >
+        Select Thumbnail
+      </Button>
+
+      {thumbnail && <Typography variant="caption"> {thumbnail.name}</Typography>}
+
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{ mt: 3 }}
+        onClick={handleUpload}
+        disabled={loading}
+        startIcon={
+          loading ? <CircularProgress size={20} /> : <CloudUploadIcon />
+        }
+      >
+        {loading ? "Uploading..." : "Upload"}
+      </Button>
+    </Paper>
   );
 }

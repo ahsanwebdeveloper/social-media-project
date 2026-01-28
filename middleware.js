@@ -10,21 +10,32 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
 
-        // allow auth related routes
-        if (
-          pathname.startsWith("/api/auth") ||
-          pathname === "/login" ||
-          pathname === "/register"
-        ) {
+        
+        if (pathname.startsWith("/api/auth")) {
           return true;
         }
 
-        // public routes
-        if (pathname === "/" || pathname.startsWith("/api/video")) {
+
+        if (pathname === "/" || pathname === "/login" || pathname === "/register") {
           return true;
         }
 
-        // all other routes require token
+        
+        if (pathname.startsWith("/api/video") && req.method === "GET") {
+          return true;
+        }
+
+        
+        if (pathname.startsWith("/api/cloudinary")) {
+          return !!token;
+        }
+
+        
+        if (pathname.startsWith("/api/video")) {
+          return !!token;
+        }
+
+  
         return !!token;
       },
     },
@@ -32,5 +43,7 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public/).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|public/).*)",
+  ],
 };

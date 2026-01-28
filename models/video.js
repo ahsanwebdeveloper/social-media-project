@@ -4,7 +4,7 @@ const videoSchema = new Schema({
     title:{type:String, required:true},
     description:{type:String, required: true},
     videoUrl:{type:String, required:true},
-    thubmnailUrl:{type:String, requireed:true},
+thumbnailUrl:{type:String, required:true},
     controls:{type:Boolean, default:true},
     transformation:{
         height:{type:Number, default:720},
