@@ -1,43 +1,119 @@
 "use client";
-
-import { Button } from "@mui/material";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { Box, Button, Typography, Container } from "@mui/material";
+import Link from "next/link";
 
 export default function Home() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <p className="text-center mt-10">Loading...</p>;
+    return (
+      <Typography variant="h6" align="center" sx={{ mt: 10 }}>
+        Loading...
+      </Typography>
+    );
   }
 
   return (
-    <div className="text-center mt-10">
-      <h1 className="text-3xl font-bold mb-4">Welcome to Home Page</h1>
+    <Box
+      sx={{
+      
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+    
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+        }}
+        src= "/main-video.mp4"
+      ></video>
 
-      {session ? (
-        <>
-          <p className="text-lg text-gray-700">
-            Signed in as {session.user?.email}
-          </p>
-          <Button
-            onClick={() => signOut()}
-            className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
-          >
-            Sign Out
-          </Button>
-        </>
-      ) : (
-        <>
-          <p className="text-lg text-gray-700">You are not signed in</p>
-          <Button
-            onClick={() => signIn()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Sign In
-          </Button>
-          
-        </>
-      )}
-    </div>
+
+      <Container
+        maxWidth="md"
+        sx={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          color: "#fff",
+          textShadow: "1px 1px 4px rgba(0,0,0,0.7)",
+        }}
+      >
+        <Typography variant="h2" gutterBottom sx={{ fontWeight: "bold" }}>
+          Welcome to AliReels
+        </Typography>
+
+        {session && (
+          <Typography variant="h6" gutterBottom>
+            Signed in as: {session.user?.email}
+          </Typography>
+        )}
+
+        
+        <Box sx={{ display: "flex", gap: 2, mt: 4, flexWrap: "wrap", justifyContent: "center" }}>
+          {session ? (
+            <>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => signOut()}
+                sx={{ px: 3, py: 1.5 }}
+              >
+                Sign Out
+              </Button>
+
+              <Link href="/video" passHref>
+                <Button variant="contained" color="primary" sx={{ px: 3, py: 1.5 }}>
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => signIn()}
+                sx={{ px: 3, py: 1.5 }}
+              >
+                Sign In
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ px: 3, py: 1.5 }}
+                
+              >
+                Register
+              </Button>
+
+              <Link href="/login" passHref>
+                <Button variant="contained" color="success" sx={{ px: 3, py: 1.5 }}>
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
+        </Box>
+      </Container>
+    </Box>
   );
 }

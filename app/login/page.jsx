@@ -30,14 +30,13 @@ export default function LoginPage() {
       return;
     }
 
-    // Successful login
     router.push("/");
   };
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

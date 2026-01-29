@@ -34,21 +34,24 @@ const VideoPage = () => {
 
   return (
     <Box
-      sx={{
-        height: "100vh",
-        overflowY: "scroll",
-        scrollSnapType: "y mandatory",
-        scrollBehavior: "smooth",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        rowGap: 2, 
-        py: 0, 
-        "&::-webkit-scrollbar": { display: "none" },
-        "-ms-overflow-style": "none", 
-        scrollbarWidth: "none", 
-      }}
-    >
+  sx={{
+    height: "100vh",
+    overflowY: "scroll",
+    scrollSnapType: "y mandatory",
+    scrollBehavior: "smooth",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    rowGap: 4,
+    py: 2,
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
+    msOverflowStyle: "none", 
+    scrollbarWidth: "none",  
+  }}
+>
+
       <Grid
         container
         direction="column"
@@ -60,7 +63,7 @@ const VideoPage = () => {
           return (
             <Grid
               item
-              key={video._id}
+              key={`${video._id}-${index}`}
               ref={isLast ? ref : null}
               sx={{
                 scrollSnapAlign: "center",

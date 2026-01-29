@@ -10,6 +10,7 @@ export default function Register() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username , setUsername] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ export default function Register() {
       const res = await fetch("/api/auth/register", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, username }),
       });
 
       const data = await res.json();
@@ -39,7 +40,7 @@ export default function Register() {
         return;
       }
 
-      // Success → redirect to login
+      
       router.push("/login");
     } catch (err) {
       console.error(err);
@@ -52,7 +53,7 @@ export default function Register() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -64,7 +65,7 @@ export default function Register() {
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
+        <TextField label="UserName" type="text" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} required />
         <TextField label="Email" type="email" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <TextField label="Confirm Password" type="password" fullWidth margin="normal" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
