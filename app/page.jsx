@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <Box
       sx={{
-      
+        marginTop:"20%",
         width: "100%",
         height: "100%",
         overflow: "hidden",
@@ -31,6 +31,7 @@ export default function Home() {
         playsInline
         style={{
           position: "absolute",
+          paddingTop:"4.5%",
           width: "100%",
           height: "100%",
           objectFit: "cover",
@@ -95,15 +96,15 @@ export default function Home() {
               >
                 Sign In
               </Button>
-
+               <Link href="/register" passHref>
               <Button
                 variant="outlined"
                 color="secondary"
                 sx={{ px: 3, py: 1.5 }}
-                
               >
                 Register
               </Button>
+              </Link>
 
               <Link href="/login" passHref>
                 <Button variant="contained" color="success" sx={{ px: 3, py: 1.5 }}>

@@ -1,7 +1,6 @@
 "use client";
-
 import { useSession, signOut } from "next-auth/react";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton,Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
@@ -9,6 +8,9 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "@/public/favicon.ico";
 import { useColorMode } from "@/app/theme-provider"; 
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
+
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -50,7 +52,15 @@ export default function Header() {
 
         {session ? (
           <>
-            <p>{session.user?.email}</p>
+             <Stack direction="row" spacing={1} alignItems="center" component={Link} href="/profile">
+    <Avatar
+      alt={session.user?.username}
+      src={session.user?.image || "/default-avatar.png"} 
+      sx={{ width: 40, height: 40 }}
+      
+    />
+    <Typography variant="body2">{session.user?.username}</Typography>
+  </Stack>
             <Button variant="contained" onClick={() => signOut()}>
               Sign Out
             </Button>

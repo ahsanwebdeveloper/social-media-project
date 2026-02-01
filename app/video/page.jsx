@@ -75,10 +75,12 @@ const VideoPage = () => {
               }}
             >
               <VideoCard
+                key={video.id}
                 videoUrl={video.videoUrl}
                 thumbnailUrl={video.thumbnailUrl}
                 title={video.title}
                 description={video.description}
+                video={video}
               />
             </Grid>
           );

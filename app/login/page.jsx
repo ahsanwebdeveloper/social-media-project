@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession(); // ✅ session hook
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 🔥 Redirect if user is already logged in
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/"); // ✅ use replace to prevent back to login
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,8 +39,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.replace("/"); // ✅ replace instead of push
   };
+
+  if (status === "loading") {
+    return <div>Loading...</div>; // Optional: Skeleton or spinner
+  }
 
   return (
     <Box
@@ -87,7 +100,10 @@ export default function LoginPage() {
           {loading ? "Logging in..." : "Login"}
         </Button>
         <Typography variant="body2" textAlign="center" mt={2}>
-          If you are new please register <Button variant="text" onClick={() => router.push("/register")}>Register</Button>
+          If you are new please register{" "}
+          <Button variant="text" onClick={() => router.push("/register")}>
+            Register
+          </Button>
         </Typography>
       </Box>
     </Box>

@@ -5,8 +5,12 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import ShareIcon from "@mui/icons-material/Share";
 import { useInView } from "react-intersection-observer";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
+import { useSession } from "next-auth/react";
 
-const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
+const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
+  const { data: session, status } = useSession();
   const videoRef = useRef(null);
   const { ref, inView } = useInView({ threshold: 0.75 });
 
@@ -16,7 +20,10 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
     if (inView) videoRef.current.play();
     else videoRef.current.pause();
   }, [inView]);
+  console.log(session)
 
+ 
+  
   return (
     <Card
       ref={ref}
@@ -30,7 +37,6 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
         backgroundColor: "black",
       }}
     >
-      {/* Video */}
       <video
         ref={videoRef}
         src={videoUrl}
@@ -44,7 +50,7 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
         }}
       />
 
-      {/* Overlay: Title & Description */}
+
       <Box
         sx={{
           position: "absolute",
@@ -62,7 +68,6 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
         </Typography>
       </Box>
 
-      {/* Right side vertical buttons */}
       <Box
         sx={{
           position: "absolute",
@@ -74,6 +79,17 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description }) => {
           color: "white",
         }}
       >
+        <Stack direction="column" spacing={1} alignItems="center">
+  <Avatar
+    alt={video.user?.username || "Unknown"}
+    src={video.user?.image || "/default-avatar.png"}
+    sx={{ width: 56, height: 56 }}
+  />
+  <Typography variant="h6" sx={{ color: "white", fontSize: 16 }}>
+    {video.user?.username || "Unknown"}
+  </Typography>
+</Stack>
+
         <IconButton sx={{ color: "white" }}>
           <FavoriteIcon fontSize="large" />
         </IconButton>

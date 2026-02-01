@@ -1,52 +1,72 @@
-
 "use client";
-
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TextField, Button, Box, Typography, Alert } from "@mui/material";
-
-export default function Register() {
+import { signIn, useSession } from "next-auth/react";
+import { TextField, Button, Box, Typography, Alert, Avatar,  ButtonBase } from "@mui/material";
+export default function Register() { 
   const router = useRouter();
-
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username , setUsername] = useState("")
+  const [username , setUsername] = useState("");
+  const [avatarSrc, setAvatarSrc] = useState(undefined);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
+useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/"); 
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/api/auth/register", { 
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        email, 
+        password, 
+        username, 
+        image: avatarSrc 
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data?.error || "Registration failed");
       return;
     }
 
-    setLoading(true);
+    router.push("/login");
+  } catch (err) {
+    console.error(err);
+    setError("Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
-    try {
-      const res = await fetch("/api/auth/register", { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.error || "Registration failed");
-        return;
-      }
-
-      
-      router.push("/login");
-    } catch (err) {
-      console.error(err);
-      setError("Registration failed");
-    } finally {
-      setLoading(false);
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatarSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -69,6 +89,37 @@ export default function Register() {
         <TextField label="Email" type="email" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <TextField label="Password" type="password" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <TextField label="Confirm Password" type="password" fullWidth margin="normal" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+          <ButtonBase
+      component="label"
+      role={undefined}
+      tabIndex={-1} 
+      aria-label="Avatar image"
+      sx={{
+        borderRadius: '40px',
+        '&:has(:focus-visible)': {
+          outline: '2px solid',
+          outlineOffset: '2px',
+        },
+      }}
+    >
+      <Avatar alt="Upload new avatar" src={avatarSrc} />
+      <input
+        type="file"
+        accept="image/*"
+        style={{
+          border: 0,
+          clip: 'rect(0 0 0 0)',
+          height: '1px',
+          margin: '-1px',
+          overflow: 'hidden',
+          padding: 0,
+          position: 'absolute',
+          whiteSpace: 'nowrap',
+          width: '1px',
+        }}
+        onChange={handleAvatarChange}
+      />
+    </ButtonBase>
 
         <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
           {loading ? "Registering..." : "Register"}
