@@ -1,31 +1,60 @@
-import mongoose, { Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const videoSchema = new Schema({
-  userId: {type: String,required: true,index: true},
-    title:{type:String, required:true},
-    description:{type:String, required: true},
-    videoUrl:{type:String, required:true},
-thumbnailUrl:{type:String, required:true},
-    controls:{type:Boolean, default:true},
-    transformation:{
-        height:{type:Number, default:720},
-         width:{type:Number, default:1220},
-         quality:{type:Number, min:1,max:100}
+const videoSchema = new Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
-    createdAt: {
-    type: Date,
-    default: Date.now,
+
+    title: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    videoUrl: {
+      type: String,
+      required: true,
+    },
+
+    thumbnailUrl: {
+      type: String,
+      required: true,
+    },
+
+    controls: {
+      type: Boolean,
+      default: true,
+    },
+
+    transformation: {
+      height: {
+        type: Number,
+        default: 720,
+      },
+      width: {
+        type: Number,
+        default: 1220,
+      },
+      quality: {
+        type: Number,
+        min: 1,
+        max: 100,
+        default: 80,
+      },
+    },
   },
-  updatedAt:{
-    type: Date,
-    default: Date.now,
+  {
+    timestamps: true, 
   }
+);
 
-},
- {
-    timestamps: true,
-  }
-)
 const Video = mongoose.models.Video || mongoose.model("Video", videoSchema);
-
 export default Video;

@@ -3,35 +3,33 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new Schema(
   {
-    username:{
+    username: {
       type: String,
-      require:true,
-      unique:true
+      required: true, 
+      unique: true,
+      index: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
+      index: true,
     },
+
     password: {
       type: String,
       required: true,
+      select: false, 
     },
-    image:{
+
+    image: {
       type: String,
-      required :true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+      required: true, 
     },
   },
   {
-    timestamps: true,
+    timestamps: true, 
   }
 );
 
@@ -44,3 +42,4 @@ userSchema.pre("save", async function () {
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;
+

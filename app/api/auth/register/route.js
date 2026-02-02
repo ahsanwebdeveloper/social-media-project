@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     await connectToDatabase();
 
-    const { email, password, username, userprofile } = await request.json();
+    const { email, password, username, image } = await request.json();
 
     if (!email || !password || !username) {
       return NextResponse.json(
@@ -33,9 +33,9 @@ export async function POST(request) {
     }
 
     let profileImageUrl = "";
-    if (userprofile) {
+    if (image) {
       
-      const result = await cloudinary.uploader.upload(userprofile, {
+      const result = await cloudinary.uploader.upload(image, {
         resource_type: "image",
         folder: "profile_images",
       });
@@ -46,7 +46,7 @@ export async function POST(request) {
       email,
       password,
       username,
-      userprofile: profileImageUrl,
+      image: profileImageUrl,
     });
 
     return NextResponse.json(

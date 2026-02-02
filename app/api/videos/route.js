@@ -3,25 +3,28 @@ import Video from "@/models/video";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+
 
 export async function GET(req) {
   try {
     await connectToDatabase();
-
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
 
     const skip = (page - 1) * limit;
-    const query = userId ? { userId } : {};
+    const query = userId
+  ? { user: new mongoose.Types.ObjectId(userId) }
+  : {};
 
     const videos = await Video.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate({
-    path: 'userId',      
+    path: 'user',      
     select: 'username image',})
     return NextResponse.json(videos ?? []);
   } catch (err) {
@@ -46,7 +49,8 @@ export async function POST(req) {
 
     await connectToDatabase();
 
-    const { title, description, videoUrl, thumbnailUrl } = await req.json();
+    const body = await req.json();
+    const { title, description, videoUrl, thumbnailUrl } = body;
 
     if (!title || !description || !videoUrl || !thumbnailUrl) {
       return NextResponse.json(
@@ -56,11 +60,11 @@ export async function POST(req) {
     }
 
     const video = await Video.create({
-      title,
-      description,
-      videoUrl,
-      thumbnailUrl,
-      userId: session.user.id, 
+      user: session.user.id,
+      title: title,
+      description: description,
+      videoUrl: videoUrl,
+      thumbnailUrl: thumbnailUrl,
     });
 
     return NextResponse.json(video, { status: 201 });

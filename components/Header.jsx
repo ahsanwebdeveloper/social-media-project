@@ -52,15 +52,16 @@ export default function Header() {
 
         {session ? (
           <>
-             <Stack direction="row" spacing={1} alignItems="center" component={Link} href="/profile">
-    <Avatar
-      alt={session.user?.username}
-      src={session.user?.image || "/default-avatar.png"} 
-      sx={{ width: 40, height: 40 }}
-      
-    />
-    <Typography variant="body2">{session.user?.username}</Typography>
-  </Stack>
+            <Link href={`/profile/${session.user.id}`} style={{ textDecoration: "none" }}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Avatar
+          alt={session.user.username || "Unknown"}
+          src={session.user.image || "/default-avatar.png"}
+          sx={{ width: 40, height: 40 }}
+        />
+        <Typography variant="body2">@{session.user?.username}</Typography>
+      </Stack>
+    </Link>
             <Button variant="contained" onClick={() => signOut()}>
               Sign Out
             </Button>

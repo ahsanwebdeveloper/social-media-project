@@ -1,35 +1,26 @@
-"use client"
-import { Card, CardMedia, CardContent, Typography } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardMedia from "@mui/material/CardMedia";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
 
-const VideoCard = ({ video }) => {
+export default function ProfileVideoCard({ video, videoUrl, thumbnailUrl, title, description }) {
   return (
-    <Card
-      sx={{
-        mb: 2,
-        breakInside: "avoid", 
-        borderRadius: 2,
-        boxShadow: 3,
-      }}
-    >
+    <Card>
       <CardMedia
         component="video"
-        src={video.videoUrl}
+        src={videoUrl}
+        poster={thumbnailUrl}
         controls
-        sx={{
-          width: "100%",
-          borderTopLeftRadius: 8,
-          borderTopRightRadius: 8,
-        }}
+        style={{ width: "100%", maxHeight: "300px", objectFit: "cover" }}
       />
-      {video.caption && (
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            {video.caption}
-          </Typography>
-        </CardContent>
-      )}
+      <CardContent>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {description}
+        </Typography>
+      </CardContent>
     </Card>
   );
-};
-
-export default VideoCard;
+}

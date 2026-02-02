@@ -8,21 +8,18 @@ import { useInView } from "react-intersection-observer";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
   const { data: session, status } = useSession();
   const videoRef = useRef(null);
   const { ref, inView } = useInView({ threshold: 0.75 });
-
-  // Autoplay/pause
   useEffect(() => {
     if (!videoRef.current) return;
     if (inView) videoRef.current.play();
     else videoRef.current.pause();
   }, [inView]);
   console.log(session)
-
- 
   
   return (
     <Card
@@ -60,6 +57,9 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
           textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
         }}
       >
+         <Typography variant="h6" sx={{ color: "white", fontSize: 16 }}>
+   <Link href={`/profile/${video.user._id}`} style={{ textDecoration: "none" }}> @{video.user?.username}</Link>
+  </Typography>
         <Typography variant="h6" sx={{ fontSize: 18 }}>
           {title}
         </Typography>
@@ -79,16 +79,15 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
           color: "white",
         }}
       >
-        <Stack direction="column" spacing={1} alignItems="center">
-  <Avatar
-    alt={video.user?.username || "Unknown"}
-    src={video.user?.image || "/default-avatar.png"}
-    sx={{ width: 56, height: 56 }}
-  />
-  <Typography variant="h6" sx={{ color: "white", fontSize: 16 }}>
-    {video.user?.username || "Unknown"}
-  </Typography>
-</Stack>
+        <Link href={`/profile/${video.user._id}`} style={{ textDecoration: "none" }}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Avatar
+          alt={video.user?.username || "Unknown"}
+          src={video.user?.image || "/default-avatar.png"}
+          sx={{ width: 56, height: 56 }}
+        />
+      </Stack>
+    </Link>
 
         <IconButton sx={{ color: "white" }}>
           <FavoriteIcon fontSize="large" />
