@@ -9,8 +9,12 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import FollowButton from "@/components/follow/FollowButton";
+import { useParams } from "next/navigation";
 
 const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
+  const params = useParams();
+    const userId = params.userId;
   const { data: session, status } = useSession();
   const videoRef = useRef(null);
   const { ref, inView } = useInView({ threshold: 0.75 });
@@ -58,6 +62,7 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
         }}
       >
          <Typography variant="h6" sx={{ color: "white", fontSize: 16 }}>
+      <FollowButton profileUserId={video.user._id} />
    <Link href={`/profile/${video.user._id}`} style={{ textDecoration: "none" }}> @{video.user?.username}</Link>
   </Typography>
         <Typography variant="h6" sx={{ fontSize: 18 }}>

@@ -62,7 +62,7 @@ export default function Header() {
         <Typography variant="body2">@{session.user?.username}</Typography>
       </Stack>
     </Link>
-            <Button variant="contained" onClick={() => signOut()}>
+            <Button variant="contained" color="error" onClick={() => signOut()}>
               Sign Out
             </Button>
             <Link href="/uploadfile" passHref>

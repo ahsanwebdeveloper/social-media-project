@@ -6,12 +6,10 @@ export async function GET(req, { params }) {
   try {
     await connectToDatabase();
 
-    // 🔥 Unwrap params if it's a promise
-    const resolvedParams = await params; // <-- important
+    const resolvedParams = await params; 
     const userId = resolvedParams.userId;
 
     const user = await User.findById(userId).select("username image");
-
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }

@@ -6,8 +6,8 @@ import { Divider, Typography } from "@mui/material";
 import { Masonry } from "@mui/lab";
 import ProfileVideoCard from "@/components/ProfileVideoCard";
 import { useParams } from "next/navigation";
-
-export default function ProfilePage() {
+import FollowButton from "@/components/follow/FollowButton";
+export default function ProfilePage( ) {
   const params = useParams();
   const userId = params.userId;
 
@@ -55,6 +55,7 @@ export default function ProfilePage() {
           sx={{ width: 64, height: 64 }}
         />
         <Typography variant="h4">@{user.username}</Typography>
+        <FollowButton profileUserId={user._id} />
       </Stack>
 
       <Divider sx={{ my: 2 }} />
