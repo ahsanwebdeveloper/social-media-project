@@ -7,17 +7,16 @@ import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { data: session, status } = useSession(); // ✅ session hook
+  const { data: session, status } = useSession(); 
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔥 Redirect if user is already logged in
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/"); // ✅ use replace to prevent back to login
+      router.replace("/"); 
     }
   }, [status, router]);
 
@@ -39,11 +38,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace("/"); // ✅ replace instead of push
+    router.replace("/"); 
   };
 
   if (status === "loading") {
-    return <div>Loading...</div>; // Optional: Skeleton or spinner
+    return <div>Loading...</div>; 
   }
 
   return (

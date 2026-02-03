@@ -13,48 +13,52 @@ export default function useFollow(profileUserId) {
   useEffect(() => {
     if (!profileUserId) return;
 
-    const fetchFollowData = async () => {
+    const fetchData = async () => {
       try {
-        // Get all followers
         const followers = await getFollowers(profileUserId);
         setFollowersCount(followers.length);
 
-        // Check if logged-in user is following this profile
         if (session?.user?.id) {
-          const following = followers.some(f => f.follower._id === session.user.id);
-          setIsFollowing(following);
+          const followed = followers.some(
+            f => f.follower._id === session.user.id
+          );
+          setIsFollowing(followed);
         }
 
-        //  fetch how many users this profile is following
-        const followingUsers = await getFollowing(profileUserId);
-        setFollowingCount(followingUsers.length);
+        const following = await getFollowing(profileUserId);
+        setFollowingCount(following.length);
 
       } catch (err) {
-        console.error("Error fetching follow data:", err);
+        console.error(err);
       }
     };
 
-    fetchFollowData();
+    fetchData();
   }, [profileUserId, session?.user?.id]);
 
+  //  TOGGLE FOLLOW / UNFOLLOW
   const toggleFollow = async () => {
     if (!session?.user?.id) return;
     setLoading(true);
 
     try {
-      const data = await followUser(profileUserId); // Backend toggles follow/unfollow
-
+      const data = await followUser(profileUserId); 
       setIsFollowing(data.following);
-
-      // Update followers count based on backend response
-      setFollowersCount(prev => (data.following ? prev + 1 : prev - 1));
-
+      setFollowersCount(prev =>
+        data.following ? prev + 1 : prev - 1
+      );
     } catch (err) {
-      console.error("Toggle follow error:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  return { isFollowing, followersCount, followingCount, toggleFollow, loading };
+  return {
+    isFollowing,
+    followersCount,
+    followingCount,
+    toggleFollow,
+    loading,
+  };
 }

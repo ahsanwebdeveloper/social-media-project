@@ -33,6 +33,10 @@ const videoSchema = new Schema(
       type: Boolean,
       default: true,
     },
+     likesCount: { 
+        type: Number,
+         default: 0
+       }, 
 
     transformation: {
       height: {
@@ -49,6 +53,7 @@ const videoSchema = new Schema(
         max: 100,
         default: 80,
       },
+      
     },
   },
   {

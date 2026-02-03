@@ -42,6 +42,8 @@ export default function ProfilePage( ) {
       .finally(() => setLoadingVideos(false));
   }, [userId]);
   console.log(`${userId}`)
+  console.log("Profile user data:", user);
+
 
   if (error) return <Typography color="error">{error}</Typography>;
   if (loadingUser) return <Typography>Loading profile...</Typography>;
@@ -56,6 +58,7 @@ export default function ProfilePage( ) {
         />
         <Typography variant="h4">@{user.username}</Typography>
         <FollowButton profileUserId={user._id} />
+       <Typography variant="h5">❤️ {user.totalLikes} Likes</Typography>
       </Stack>
 
       <Divider sx={{ my: 2 }} />

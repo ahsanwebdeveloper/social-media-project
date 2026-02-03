@@ -11,8 +11,10 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import FollowButton from "@/components/follow/FollowButton";
 import { useParams } from "next/navigation";
+import useLike from "../hooks/useLike";
 
 const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
+  const { liked, likesCount, handleLike } = useLike(video._id);
   const params = useParams();
     const userId = params.userId;
   const { data: session, status } = useSession();
@@ -94,9 +96,15 @@ const VideoCard = ({ videoUrl, thumbnailUrl, title, description,video }) => {
       </Stack>
     </Link>
 
-        <IconButton sx={{ color: "white" }}>
-          <FavoriteIcon fontSize="large" />
-        </IconButton>
+        <IconButton sx={{ color: "white", flexDirection:"column" }} onClick={handleLike}>
+  {liked ? (
+    <FavoriteIcon fontSize="large" color="error" />
+  ) : (
+    <FavoriteIcon fontSize="large" />
+  )}
+  <Typography variant="span">{ likesCount}</Typography>
+</IconButton>
+
         <IconButton sx={{ color: "white" }}>
           <CommentIcon fontSize="large" />
         </IconButton>
