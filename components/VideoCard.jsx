@@ -85,22 +85,50 @@ const VideoCard = ({ video }) => {
             textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
           }}
         >
-          <Stack direction="row" spacing={1} alignItems="center">
-            <FollowButton profileUserId={video.user._id} />
-            <Link
-              href={`/profile/${video.user._id}`}
-              style={{ color: "white", textDecoration: "none" }}
-            >
-              @{video.user?.username}
-            </Link>
-          </Stack>
+          <Box sx={{ mb: 2, px: 1 }}>
+  <Stack direction="column" spacing={1} alignItems="center">
+    <FollowButton profileUserId={video.user._id} />
+  </Stack>
+  <Link
+      href={`/profile/${video.user._id}`}
+      style={{
+        color: "#ffffff",       
+        textDecoration: "none",
+        fontWeight: 500,
+        fontSize: 14,
+        
+      }}
+    >
+      @{video.user?.username}
+    </Link>
+  {/* Video Title */}
+  <Typography
+    variant="h6"
+    sx={{
+      fontSize: { xs: 14, sm: 16 }, 
+      mt: 1,
+      fontWeight: "bold",
+      color: "#ffffff",
+      textAlign: { xs: "center", sm: "left" },
+    }}
+  >
+    {video.title}
+  </Typography>
 
-          <Typography variant="h6" sx={{ fontSize: 16, mt: 1 }}>
-            {video.title}
-          </Typography>
-          <Typography variant="body2" sx={{ fontSize: 14 }}>
-            {video.description}
-          </Typography>
+  {/* Video Description */}
+  <Typography
+    variant="body2"
+    sx={{
+      fontSize: { xs: 12, sm: 14 },
+      color: "#e0e0e0",
+      textAlign: { xs: "center", sm: "left" },
+      mt: 0.5,
+    }}
+  >
+    {video.description}
+  </Typography>
+</Box>
+
         </Box>
 
         {/* ACTIONS RIGHT */}

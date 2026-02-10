@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 export default function Register() {
   const router = useRouter();
   const { status } = useSession();
-
   const [avatarSrc, setAvatarSrc] = useState(undefined);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,7 +90,7 @@ const watchUserName = watch("username", "");
     <Box
       sx={{
         width: "100%",
-        minHeight: "100vh",
+        minHeight: "50vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -108,7 +107,7 @@ const watchUserName = watch("username", "");
           borderRadius: 5,
           overflow: "hidden",
           boxShadow: 4,
-          bgcolor: "success.light",
+          bgcolor: "#E50031",
           flexDirection: { xs: "column", md: "row" },
         }}
       >
@@ -116,7 +115,7 @@ const watchUserName = watch("username", "");
         <Box
           sx={{
             width: { xs: "100%", md: "50%" },
-            bgcolor: "success.light",
+            bgcolor: "#E50031",
             color: "white",
             display: { xs: "none", md: "flex" },
             alignItems: "center",
@@ -209,6 +208,7 @@ const watchUserName = watch("username", "");
             <ButtonBase component="label">
               <Avatar src={avatarSrc} sx={{ width: 80, height: 80 }} />
               <input
+              label="Avatar"
                 type="file"
                 accept="image/*"
                 hidden

@@ -1,104 +1,142 @@
 "use client";
+
+import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Box, Button, IconButton,Typography } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Typography, Button, Drawer, Box, List, ListItem, ListItemText, Avatar, Stack, Divider } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/public/favicon.ico";
-import { useColorMode } from "@/app/theme-provider"; 
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-
+import { useColorMode } from "@/app/theme-provider";
 
 export default function Header() {
   const { data: session, status } = useSession();
-  const { toggleColorMode, mode } = useColorMode(); 
+  const { toggleColorMode, mode } = useColorMode();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (status === "loading") return null;
 
-  return (
-    <header className="flex justify-between items-center p-4 border-b">
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 2,
-          overflow: "hidden",
-          border: "1px solid #e0e0e0",
-        }}
-      >
-        <Image
-          src={logo}
-          alt="AliReels Logo"
-          style={{
-            objectFit: "contain",
-            borderRadius: 8,
-            width: 50,
-            height: 50,
-          }}
-        />
+  const drawerWidth = 240;
+
+  const drawer = (
+    <Box sx={{ width: drawerWidth }} role="presentation" onClick={handleDrawerToggle}>
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Image src={logo} alt="AliReels Logo" width={40} height={40} style={{ borderRadius: 8 }} />
+        <Typography variant="h6" noWrap>AliReels</Typography>
       </Box>
-
-    
-      <div className="flex items-center gap-2">
-
-        <IconButton onClick={toggleColorMode} color="inherit">
-          {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
-        </IconButton>
-
+      <Divider />
+      <List>
         {session ? (
           <>
-            <Link href={`/profile/${session.user.id}`} style={{ textDecoration: "none" }}>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Avatar
-          alt={session.user.username || "Unknown"}
-          src={session.user.image || "/default-avatar.png"}
-          sx={{ width: 40, height: 40 }}
-        />
-        <Typography variant="body2">@{session.user?.username}</Typography>
-      </Stack>
-    </Link>
-            <Button variant="contained" color="error" onClick={() => signOut()}>
-              Sign Out
-            </Button>
-            <Link href="/uploadfile" passHref>
-              <Button
-                variant="contained"
-                startIcon={<CloudUploadIcon />}
-                sx={{ textTransform: "none", borderRadius: 2 }}
-              >
-                Upload Video
-              </Button>
-            </Link>
+            <ListItem button component={Link} href={`/profile/${session.user.id}`}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Avatar src={session.user.image || "/default-avatar.png"} />
+                <Typography>@{session.user.username}</Typography>
+              </Stack>
+            </ListItem>
+            <ListItem button onClick={() => signOut()}>
+              <ListItemText primary="Sign Out" />
+            </ListItem>
+            <ListItem button component={Link} href="/uploadfile">
+              <CloudUploadIcon sx={{ mr: 1 }} />
+              <ListItemText primary="Upload Video" />
+            </ListItem>
           </>
         ) : (
           <>
-            <Link href="/login" passHref>
-              <Button variant="contained" sx={{ textTransform: "none", borderRadius: 2 }}>
-                Login
-              </Button>
-            </Link>
-            <Link href="/register" passHref>
-              <Button variant="contained" sx={{ textTransform: "none", borderRadius: 2 }}>
-                Register
-              </Button>
-            </Link>
-            <Link href="/uploadfile" passHref>
-              <Button
-                variant="contained"
-                startIcon={<CloudUploadIcon />}
-                sx={{ textTransform: "none", borderRadius: 2 }}
-              >
-                Upload Video
-              </Button>
-            </Link>
+            <ListItem button component={Link} href="/login">
+              <ListItemText primary="Login" />
+            </ListItem>
+            <ListItem button component={Link} href="/register">
+              <ListItemText primary="Register" />
+            </ListItem>
+            <ListItem button component={Link} href="/uploadfile">
+              <CloudUploadIcon sx={{ mr: 1 }} />
+              <ListItemText primary="Upload Video" />
+            </ListItem>
           </>
         )}
-      </div>
-    </header>
+      </List>
+    </Box>
+  );
+
+  return (
+    <>
+      <AppBar position="static" sx={{ bgcolor: "#1D4ED8" }}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          {/* Logo */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Image src={logo} alt="AliReels Logo" width={40} height={40} style={{ borderRadius: 8 }} />
+            <Typography variant="h6" sx={{ color: "#E50031", fontWeight: "bold" }}>
+              AliReels
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1 }}>
+            <IconButton onClick={toggleColorMode} sx={{ color: "white" }}>
+              {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
+            </IconButton>
+
+            {session ? (
+              <>
+                <Link href={`/profile/${session.user.id}`} style={{ textDecoration: "none", color: "white" }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Avatar src={session.user.image || "/default-avatar.png"} sx={{ width: 35, height: 35 }} />
+                    <Typography>@{session.user.username}</Typography>
+                  </Stack>
+                </Link>
+                <Button variant="contained" color="error" onClick={() => signOut()}>
+                  Sign Out
+                </Button>
+                <Link href="/uploadfile" passHref>
+                  <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                    Upload Video
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" passHref>
+                  <Button variant="contained" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register" passHref>
+                  <Button variant="contained" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                    Register
+                  </Button>
+                </Link>
+                <Link href="/uploadfile" passHref>
+                  <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                    Upload Video
+                  </Button>
+                </Link>
+              </>
+            )}
+          </Box>
+
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="end"
+            onClick={handleDrawerToggle}
+            sx={{ display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
+        {drawer}
+      </Drawer>
+    </>
   );
 }

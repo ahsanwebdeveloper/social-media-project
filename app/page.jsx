@@ -17,13 +17,13 @@ export default function Home() {
   return (
     <Box
       sx={{
-        marginTop:"20%",
         width: "100%",
         height: "100%",
+    
         overflow: "hidden",
       }}
     >
-    
+      {/* Background Video */}
       <video
         autoPlay
         loop
@@ -31,57 +31,79 @@ export default function Home() {
         playsInline
         style={{
           position: "absolute",
-          paddingTop:"4.5%",
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
           top: 0,
           left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover", // covers whole screen without stretching
           zIndex: -1,
         }}
-        src= "/main-video.mp4"
-      ></video>
+        src="/main-video.mp4"
+      />
 
-
+      {/* Overlay Container */}
       <Container
         maxWidth="md"
         sx={{
           position: "relative",
-          height: "100%",
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
           color: "#fff",
-          textShadow: "1px 1px 4px rgba(0,0,0,0.7)",
+          textShadow: "1px 1px 6px rgba(0,0,0,0.7)",
+          px: { xs: 2, sm: 4 },
         }}
       >
-        <Typography variant="h2" gutterBottom sx={{ fontWeight: "bold" }}>
+        <Typography
+          variant="h3"
+          gutterBottom
+          sx={{
+            fontWeight: "bold",
+            fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
+          }}
+        >
           Welcome to AliReels
         </Typography>
 
         {session && (
-          <Typography variant="h6" gutterBottom>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontSize: { xs: 14, sm: 16, md: 18 } }}
+          >
             Signed in as: {session.user?.email}
           </Typography>
         )}
 
-        
-        <Box sx={{ display: "flex", gap: 2, mt: 4, flexWrap: "wrap", justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mt: 4,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
           {session ? (
             <>
               <Button
                 variant="contained"
                 color="error"
                 onClick={() => signOut()}
-                sx={{ px: 3, py: 1.5 }}
+                sx={{ px: 3, py: 1.5, minWidth: 120 }}
               >
                 Sign Out
               </Button>
 
               <Link href="/video" passHref>
-                <Button variant="contained" color="primary" sx={{ px: 3, py: 1.5 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ px: 3, py: 1.5, minWidth: 120 }}
+                >
                   Get Started
                 </Button>
               </Link>
@@ -92,22 +114,27 @@ export default function Home() {
                 variant="contained"
                 color="primary"
                 onClick={() => signIn()}
-                sx={{ px: 3, py: 1.5 }}
+                sx={{ px: 3, py: 1.5, minWidth: 120 }}
               >
                 Sign In
               </Button>
-               <Link href="/register" passHref>
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ px: 3, py: 1.5 }}
-              >
-                Register
-              </Button>
+
+              <Link href="/register" passHref>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ px: 3, py: 1.5, minWidth: 120 }}
+                >
+                  Register
+                </Button>
               </Link>
 
               <Link href="/login" passHref>
-                <Button variant="contained" color="success" sx={{ px: 3, py: 1.5 }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ px: 3, py: 1.5, minWidth: 120 }}
+                >
                   Get Started
                 </Button>
               </Link>
