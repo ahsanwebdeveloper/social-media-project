@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { type } from "node:os";
 
 const videoSchema = new Schema(
   {
@@ -36,7 +37,11 @@ const videoSchema = new Schema(
      likesCount: { 
         type: Number,
          default: 0
-       }, 
+       },
+      sharesCount:{
+        type:Number,
+        default:0
+      } ,
 
     transformation: {
       height: {

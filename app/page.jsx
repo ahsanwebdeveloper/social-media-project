@@ -19,7 +19,6 @@ export default function Home() {
       sx={{
         width: "100%",
         height: "100%",
-    
         overflow: "hidden",
       }}
     >
@@ -35,7 +34,7 @@ export default function Home() {
           left: 0,
           width: "100%",
           height: "100%",
-          objectFit: "cover", // covers whole screen without stretching
+          objectFit: "cover", 
           zIndex: -1,
         }}
         src="/main-video.mp4"
