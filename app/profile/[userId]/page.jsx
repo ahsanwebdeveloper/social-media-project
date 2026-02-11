@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
@@ -103,21 +102,16 @@ export default function ProfilePage() {
       ) : videos.length === 0 ? (
         <Typography>No videos uploaded yet.</Typography>
       ) : (
-        <Masonry
-          columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-          spacing={2}
-        >
-          {videos.map((v) => (
-            <ProfileVideoCard
-              key={v._id}
-              video={v}
-              videoUrl={v.videoUrl}
-              thumbnailUrl={v.thumbnailUrl}
-              title={v.title}
-              description={v.description}
-            />
-          ))}
-        </Masonry>
+        <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={2}>
+  {videos.map((v) => (
+    <ProfileVideoCard
+      key={v._id}
+      video={v}
+      videos={videos}
+    />
+  ))}
+</Masonry>
+
       )}
     </Box>
   );

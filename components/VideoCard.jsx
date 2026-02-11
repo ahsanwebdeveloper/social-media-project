@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useRef, useEffect, useState } from "react";
 import {
   Box,
@@ -15,9 +14,7 @@ import {
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import ShareIcon from "@mui/icons-material/Share";
-
 import { useInView } from "react-intersection-observer";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 import FollowButton from "@/components/follow/FollowButton";
@@ -31,15 +28,15 @@ const VideoCard = ({ video }) => {
   const { ref, inView } = useInView({ threshold: 0.75 });
 
   const { liked, likesCount, handleLike } = useLike(video._id);
+  const { sharesCount, handleShare } = useShare(
+    video.sharesCount,
+    video._id
+  );
+  const { comments } = useComments(video._id);
+
   const [openComments, setOpenComments] = useState(false);
-  const { data: session } = useSession();
-const { sharesCount, handleShare } = useShare(video.sharesCount, video._id);
-const {
-    comments,
-  } = useComments(video._id);
 
-
-  // autoplay / pause logic
+  // autoplay / pause
   useEffect(() => {
     if (!videoRef.current) return;
     if (inView) videoRef.current.play();
@@ -50,8 +47,8 @@ const {
     <Box
       ref={ref}
       sx={{
-        width: 320,
-        height: 570,
+        width: { xs: "100%", sm: 400 },
+        height: { xs: "100vh", sm: 700 },
         position: "relative",
         margin: "auto",
       }}
@@ -60,9 +57,8 @@ const {
         sx={{
           width: "100%",
           height: "100%",
-          borderRadius: 3,
+          borderRadius: { xs: 0, sm: 3 },
           overflow: "hidden",
-          boxShadow: 3,
           backgroundColor: "black",
           position: "relative",
         }}
@@ -75,82 +71,72 @@ const {
           loop
           muted
           playsInline
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
           onClick={() => {
             if (videoRef.current.paused) videoRef.current.play();
             else videoRef.current.pause();
           }}
         />
 
-        {/* INFO BOX */}
+        {/* LEFT INFO */}
         <Box
           sx={{
             position: "absolute",
-            bottom: 16,
+            bottom: 20,
             left: 16,
             color: "white",
-            textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
+            maxWidth: "70%",
           }}
         >
-          <Box sx={{ mb: 2, px: 1 }}>
-            <Stack direction="column" spacing={1} alignItems="center">
-              <FollowButton profileUserId={video.user._id} />
-            </Stack>
+         <Stack direction="column" spacing={1} alignItems="flex-start">
+  <Link
+    href={`/profile/${video.user._id} || "#"}`}
+    style={{
+      color: "white",
+      textDecoration: "none",
+      fontWeight: 500,
+      display: "flex",
+      alignItems: "center",
+      gap: "8px", 
+    }}
+  >
+    <Avatar
+      src={video.user?.image || "/default-avatar.png"}
+      sx={{ width: 50, height: 50 }}
+    />
+    @{video.user?.username}
+  </Link>
 
-            <Link
-              href={`/profile/${video.user._id}`}
-              style={{
-                color: "#ffffff",
-                textDecoration: "none",
-                fontWeight: 500,
-                fontSize: 14,
-              }}
-            >
-              @{video.user?.username}
-            </Link>
+  <FollowButton profileUserId={video.user._id}  />
+</Stack>
 
-            {/* Video Title */}
-            <Typography
-              variant="h6"
-              sx={{
-                fontSize: { xs: 14, sm: 16 },
-                mt: 1,
-                fontWeight: "bold",
-                color: "#ffffff",
-                textAlign: { xs: "center", sm: "left" },
-              }}
-            >
-              {video.title}
-            </Typography>
 
-            {/* Video Description */}
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: { xs: 12, sm: 14 },
-                color: "#e0e0e0",
-                textAlign: { xs: "center", sm: "left" },
-                mt: 0.5,
-              }}
-            >
-              {video.description}
-            </Typography>
-          </Box>
+
+          <Typography fontWeight="bold" mt={1}>
+            {video.title}
+          </Typography>
+
+          <Typography variant="body2">
+            {video.description}
+          </Typography>
         </Box>
 
-        {/* ACTIONS RIGHT */}
+        {/* RIGHT ACTIONS */}
         <Box
           sx={{
             position: "absolute",
             right: 16,
-            bottom: 100,
+            bottom: 120,
             display: "flex",
             flexDirection: "column",
             gap: 2,
             alignItems: "center",
           }}
         >
-          {/* AVATAR */}
           <Link href={`/profile/${video.user._id}`}>
             <Avatar
               src={video.user?.image || "/default-avatar.png"}
@@ -158,37 +144,39 @@ const {
               sx={{ width: 56, height: 56 }}
             />
           </Link>
-
-          {/* LIKE */}
           <IconButton
             sx={{ color: "white", flexDirection: "column" }}
             onClick={handleLike}
           >
-            <FavoriteIcon
-              fontSize="medium"
-              color={liked ? "error" : "inherit"}
-            />
-            <Typography variant="caption">{likesCount}</Typography>
+            <FavoriteIcon color={liked ? "error" : "inherit"} />
+            <Typography variant="caption">
+              {likesCount}
+            </Typography>
           </IconButton>
 
-          {/* COMMENT */}
           <IconButton
             sx={{ color: "white", flexDirection: "column" }}
-            onClick={() => setOpenComments((prev) => !prev)}
+            onClick={() => setOpenComments(true)}
           >
-            <CommentIcon fontSize="medium" />
-            <Typography variant="caption">{comments?.length ?? 0}</Typography>
+            <CommentIcon />
+            <Typography variant="caption">
+              {comments?.length ?? 0}
+            </Typography>
           </IconButton>
 
-          {/* SHARE */}
-          <IconButton sx={{ color: "white", flexDirection: "column" }} onClick={handleShare}>
-            <ShareIcon fontSize="medium" />
-            <Typography variant="caption">{sharesCount?? 0}</Typography>
+          <IconButton
+            sx={{ color: "white", flexDirection: "column" }}
+            onClick={handleShare}
+          >
+            <ShareIcon />
+            <Typography variant="caption">
+              {sharesCount ?? 0}
+            </Typography>
           </IconButton>
         </Box>
       </Card>
 
-      {/* SLIDE COMMENTS PANEL */}
+      {/* COMMENTS PANEL */}
       <Slide direction="up" in={openComments} mountOnEnter unmountOnExit>
         <Box
           sx={{
@@ -219,14 +207,15 @@ const {
               background: "#555",
               borderRadius: 3,
               mx: "auto",
-              my: 1,
+              my: 2,
             }}
           />
-          <Typography variant="h6" sx={{ textAlign: "center", mb: 1 }}>
+
+          <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
             Comments
           </Typography>
 
-          <Box sx={{ px: 2, pb: 2 }}>
+          <Box sx={{ px: 2 }}>
             <CommentList videoId={video._id} />
           </Box>
         </Box>

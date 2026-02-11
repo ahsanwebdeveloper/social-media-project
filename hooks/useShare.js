@@ -7,7 +7,7 @@ export default function useShare(initialShares = 0, videoId) {
   const handleShare = async () => {
     if (!videoId) return;
 
-    const url = `${window.location.origin}/videos/${videoId}`;
+    const url = `${window.location.origin}/vide/${videoId}`;
 
     // Native share
     if (navigator.share) {
