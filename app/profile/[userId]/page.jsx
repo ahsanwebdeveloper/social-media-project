@@ -7,17 +7,18 @@ import { Masonry } from "@mui/lab";
 import ProfileVideoCard from "@/components/ProfileVideoCard";
 import { useParams } from "next/navigation";
 import FollowButton from "@/components/follow/FollowButton";
-
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 export default function ProfilePage() {
   const params = useParams();
   const userId = params.userId;
-
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState(0);
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (!userId) return;
@@ -77,6 +78,13 @@ export default function ProfilePage() {
           >
             <FollowButton profileUserId={user._id} />
             <Typography variant="h6">❤️ {user.totalLikes} Likes</Typography>
+            {session?.user?.id === userId && (
+  <Link href={`/profileupdate/${userId}`} style={{ textDecoration: "none" }}>
+    <Typography variant="body2" color="primary">
+      Update Profile
+    </Typography>
+  </Link>
+)}
           </Stack>
         </Box>
       </Box>

@@ -24,7 +24,7 @@ export async function POST(request) {
       );
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email});
     if (existingUser) {
       return NextResponse.json(
         { error: "Email already exist karta hai" },
@@ -49,6 +49,7 @@ export async function POST(request) {
       image: profileImageUrl,
     });
 
+
     return NextResponse.json(
       { message: "User successfully register ho gaya" },
       { status: 201 }
@@ -58,3 +59,10 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+
+
+
+
+
