@@ -10,12 +10,12 @@ export default function UpdateProfile() {
   const [password, setPassword] = useState("");
   const [imageFile, setImageFile] = useState(null); 
   const [avatarSrc, setAvatarSrc] = useState(""); 
- const { data: session } = useSession();
- const loggedInUserId = session?.user?.id; // ya JWT token decode se
+  const { data: session } = useSession();
+  const loggedInUserId = session?.user?.id; 
   const params = useParams();
   const userId = params.userId;
 
-  // Fetch current user
+  // Fetch user data on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
