@@ -3,13 +3,13 @@ import useComments from "@/hooks/useComments";
 import CommentItem from "./CommentItem";
 import CommentInput from "./CommentInput";
 
-export default function CommentList({ videoId }) {
+export default function CommentList({ videoId, postId }) {
   const {
     comments,
     loading,
     createComment,
     removeComment,
-  } = useComments(videoId);
+  } = useComments(videoId, postId);
 
   if (loading) return <p>Loading comments...</p>;
 

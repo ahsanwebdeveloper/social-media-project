@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Video from "@/models/video";
+import Post from "@/models/post";
 import { connectToDatabase } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -8,32 +9,52 @@ export async function POST(req) {
   try {
     await connectToDatabase();
 
-    // Get session
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get videoId from request
-    const { videoId } = await req.json();
-    if (!videoId) {
-      return NextResponse.json({ error: "videoId is required" }, { status: 400 });
+    const { videoId, postId } = await req.json();
+    if (!videoId && !postId) {
+      return NextResponse.json(
+        { error: "videoId or postId is required" },
+        { status: 400 }
+      );
     }
 
-    // Increment shares count
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { $inc: { sharesCount: 1 } },
-      { new: true }
-    );
+    let updatedItem;
 
-    if (!video) {
-      return NextResponse.json({ error: "Video not found" }, { status: 404 });
+    if (videoId) {
+      updatedItem = await Video.findByIdAndUpdate(
+        videoId,
+        { $inc: { sharesCount: 1 } },
+        { new: true }
+      );
+    } else if (postId) {
+      updatedItem = await Post.findByIdAndUpdate(
+        postId,
+        { $inc: { sharesCount: 1 } },
+        { new: true }
+      );
     }
 
-    return NextResponse.json({ success: true, sharesCount: video.sharesCount });
+    if (!updatedItem) {
+      return NextResponse.json(
+        { error: "Item not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      sharesCount: updatedItem.sharesCount,
+    });
+
   } catch (err) {
-    console.error("Failed to share video:", err);
-    return NextResponse.json({ error: "Failed to share video" }, { status: 500 });
+    console.error("SHARE ERROR:", err);
+    return NextResponse.json(
+      { error: "Failed to share" },
+      { status: 500 }
+    );
   }
 }

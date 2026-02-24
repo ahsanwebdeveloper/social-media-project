@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Box,
   Card,
@@ -16,31 +16,38 @@ import CommentIcon from "@mui/icons-material/Comment";
 import ShareIcon from "@mui/icons-material/Share";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
+
 import FollowButton from "@/components/follow/FollowButton";
 import CommentList from "@/components/comments/CommentList";
 import useLike from "@/hooks/useLike";
 import useShare from "@/hooks/useShare";
 import useComments from "@/hooks/useComments";
 
-const VideoCard = ({ video }) => {
-  const videoRef = useRef(null);
-  const { ref, inView } = useInView({ threshold: 0.75 });
+const PostCard = ({ post }) => {
+  const scrollRef = useRef(null);
+  const { ref } = useInView({ threshold: 0.75 });
 
-  const { liked, likesCount, handleLike } = useLike(video._id);
+  // ✅ FIXED: pass postId as second argument
+  const { liked, likesCount, handleLike } = useLike(null, post._id);
+
   const { sharesCount, handleShare } = useShare(
-    video.sharesCount,
-    video._id
+    post.sharesCount,
+    null,
+    post._id
   );
-  const { comments } = useComments(video._id);
+
+  const { comments } = useComments(null, post._id);
 
   const [openComments, setOpenComments] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // autoplay / pause
-  useEffect(() => {
-    if (!videoRef.current) return;
-    if (inView) videoRef.current.play();
-    else videoRef.current.pause();
-  }, [inView]);
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    const width = scrollRef.current.clientWidth;
+    const index = Math.round(scrollLeft / width);
+    setCurrentIndex(index);
+  };
 
   return (
     <Box
@@ -62,24 +69,66 @@ const VideoCard = ({ video }) => {
           position: "relative",
         }}
       >
-        {/* VIDEO */}
-        <video
-          ref={videoRef}
-          src={video.videoUrl}
-          poster={video.thumbnailUrl}
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
+        {/* IMAGE SLIDER */}
+        <Box
+          ref={scrollRef}
+          onScroll={handleScroll}
+          sx={{
+            display: "flex",
+            overflowX: "scroll",
+            scrollSnapType: "x mandatory",
             height: "100%",
-            objectFit: "cover",
+            scrollBehavior: "smooth",
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
           }}
-          onClick={() => {
-            if (videoRef.current.paused) videoRef.current.play();
-            else videoRef.current.pause();
+        >
+          {post.images?.map((img, index) => (
+            <Box
+              key={index}
+              sx={{
+                minWidth: "100%",
+                height: "100%",
+                scrollSnapAlign: "center",
+              }}
+            >
+              <img
+                src={img.url}
+                alt={img.caption || "Post image"}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
+          ))}
+        </Box>
+
+        {/* DOTS */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 120,
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            gap: 1,
           }}
-        />
+        >
+          {post.images?.map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                backgroundColor:
+                  currentIndex === index ? "white" : "gray",
+              }}
+            />
+          ))}
+        </Box>
 
         {/* LEFT INFO */}
         <Box
@@ -91,36 +140,33 @@ const VideoCard = ({ video }) => {
             maxWidth: "70%",
           }}
         >
-         <Stack direction="column" spacing={1} alignItems="flex-start">
-  <Link
-    href={`/profile/${video.user._id} || "#"}`}
-    style={{
-      color: "white",
-      textDecoration: "none",
-      fontWeight: 500,
-      display: "flex",
-      alignItems: "center",
-      gap: "8px", 
-    }}
-  >
-    <Avatar
-      src={video.user?.image || "/default-avatar.png"}
-      sx={{ width: 50, height: 50 }}
-    />
-    @{video.user?.username}
-  </Link>
+          <Stack direction="column" spacing={1}>
+            <Link
+              href={`/profile/${post.user._id}`}
+              style={{
+                color: "white",
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <Avatar
+                src={post.user?.image || "/default-avatar.png"}
+                sx={{ width: 50, height: 50 }}
+              />
+              @{post.user?.username}
+            </Link>
 
-  <FollowButton profileUserId={video.user._id}  />
-</Stack>
-
-
+            <FollowButton profileUserId={post.user._id} />
+          </Stack>
 
           <Typography fontWeight="bold" mt={1}>
-            {video.title}
+            {post.title}
           </Typography>
 
           <Typography variant="body2">
-            {video.description}
+            {post.description}
           </Typography>
         </Box>
 
@@ -136,13 +182,14 @@ const VideoCard = ({ video }) => {
             alignItems: "center",
           }}
         >
-          <Link href={`/profile/${video.user._id}`}>
+          <Link href={`/profile/${post.user._id}`}>
             <Avatar
-              src={video.user?.image || "/default-avatar.png"}
-              alt={video.user?.username}
+              src={post.user?.image || "/default-avatar.png"}
               sx={{ width: 56, height: 56 }}
             />
           </Link>
+
+          {/* LIKE */}
           <IconButton
             sx={{ color: "white", flexDirection: "column" }}
             onClick={handleLike}
@@ -153,6 +200,7 @@ const VideoCard = ({ video }) => {
             </Typography>
           </IconButton>
 
+          {/* COMMENTS */}
           <IconButton
             sx={{ color: "white", flexDirection: "column" }}
             onClick={() => setOpenComments(true)}
@@ -163,6 +211,7 @@ const VideoCard = ({ video }) => {
             </Typography>
           </IconButton>
 
+          {/* SHARE */}
           <IconButton
             sx={{ color: "white", flexDirection: "column" }}
             onClick={handleShare}
@@ -175,7 +224,7 @@ const VideoCard = ({ video }) => {
         </Box>
       </Card>
 
-      {/* COMMENTS PANEL */}
+      {/* COMMENT PANEL */}
       <Slide direction="up" in={openComments} mountOnEnter unmountOnExit>
         <Box
           sx={{
@@ -215,7 +264,7 @@ const VideoCard = ({ video }) => {
           </Typography>
 
           <Box sx={{ px: 2 }}>
-            <CommentList videoId={video._id} />
+            <CommentList postId={post._id} />
           </Box>
         </Box>
       </Slide>
@@ -223,4 +272,4 @@ const VideoCard = ({ video }) => {
   );
 };
 
-export default VideoCard;
+export default PostCard;

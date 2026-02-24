@@ -4,23 +4,20 @@ import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import Like from "@/models/Like";
 import Video from "@/models/video";
+import Post from "@/models/post";
 import mongoose from "mongoose";
 
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Please login" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Please login" }, { status: 401 });
     }
 
-    const { videoId } = await req.json();
-    if (!videoId) {
+    const { videoId, postId } = await req.json();
+    if (!videoId && !postId) {
       return NextResponse.json(
-        { error: "videoId is required" },
+        { error: "videoId or postId is required" },
         { status: 400 }
       );
     }
@@ -29,19 +26,22 @@ export async function POST(req) {
 
     const userId = session.user.id;
 
-    // check existing like
+    // Check if like already exists
     const existingLike = await Like.findOne({
       user: userId,
-      video: videoId,
+      video: videoId || null,
+      post: postId || null,
     });
 
     // UNLIKE
     if (existingLike) {
       await Like.deleteOne({ _id: existingLike._id });
 
-      await Video.findByIdAndUpdate(videoId, {
-        $inc: { likesCount: -1 },
-      });
+      if (videoId) {
+        await Video.findByIdAndUpdate(videoId, { $inc: { likesCount: -1 } });
+      } else if (postId) {
+        await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
+      }
 
       return NextResponse.json({ liked: false });
     }
@@ -49,21 +49,20 @@ export async function POST(req) {
     // LIKE
     await Like.create({
       user: userId,
-      video: videoId,
+      video: videoId || null,
+      post: postId || null,
     });
 
-    await Video.findByIdAndUpdate(videoId, {
-      $inc: { likesCount: 1 },
-    });
+    if (videoId) {
+      await Video.findByIdAndUpdate(videoId, { $inc: { likesCount: 1 } });
+    } else if (postId) {
+      await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
+    }
 
     return NextResponse.json({ liked: true });
-
   } catch (err) {
     console.error("LIKE POST ERROR:", err);
-    return NextResponse.json(
-      { error: "Like action failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Like action failed" }, { status: 500 });
   }
 }
 
@@ -73,11 +72,12 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const videoId = searchParams.get("videoId");
+    const postId = searchParams.get("postId");
     const type = searchParams.get("type");
 
-    if (!videoId) {
+    if (!videoId && !postId) {
       return NextResponse.json(
-        { error: "videoId is required" },
+        { error: "videoId or postId is required" },
         { status: 400 }
       );
     }
@@ -85,7 +85,8 @@ export async function GET(req) {
     // LIKE COUNT
     if (type === "count") {
       const count = await Like.countDocuments({
-        video: new mongoose.Types.ObjectId(videoId),
+        video: videoId ? new mongoose.Types.ObjectId(videoId) : null,
+        post: postId ? new mongoose.Types.ObjectId(postId) : null,
       });
       return NextResponse.json({ count });
     }
@@ -99,22 +100,16 @@ export async function GET(req) {
 
       const liked = await Like.exists({
         user: session.user.id,
-        video: videoId,
+        video: videoId || null,
+        post: postId || null,
       });
 
       return NextResponse.json({ liked: Boolean(liked) });
     }
 
-    return NextResponse.json(
-      { error: "Invalid type" },
-      { status: 400 }
-    );
-
+    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   } catch (err) {
     console.error("LIKE GET ERROR:", err);
-    return NextResponse.json(
-      { error: "Failed to fetch likes" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch likes" }, { status: 500 });
   }
 }

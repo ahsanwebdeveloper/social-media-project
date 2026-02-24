@@ -10,67 +10,52 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const videoId = searchParams.get("videoId");
+    const postId = searchParams.get("postId");
 
-    if (!videoId) {
-      return NextResponse.json(
-        { error: "videoId required" },
-        { status: 400 }
-      );
+    if (!videoId && !postId) {
+      return NextResponse.json({ error: "videoId or postId required" }, { status: 400 });
     }
 
-    const comments = await Comment.find({ video: videoId })
+    const query = {};
+    if (videoId) query.video = videoId;
+    if (postId) query.post = postId;
+
+    const comments = await Comment.find(query)
       .populate("user", "username image")
       .sort({ createdAt: -1 });
 
     return NextResponse.json(comments);
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: "Failed to fetch comments" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
   try {
     await connectToDatabase();
-
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { videoId, postId, content, parentComment } = await req.json();
+    if (!content || (!videoId && !postId)) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const { videoId, content, parentComment } = await req.json();
-
-    if (!videoId || !content) {
-      return NextResponse.json(
-        { error: "Missing fields" },
-        { status: 400 }
-      );
-    }
-
-    const comment = await Comment.create({
+    const commentData = {
       user: session.user.id,
-      video: videoId,
-      content, 
+      content,
       parentComment: parentComment || null,
-    });
+    };
+    if (videoId) commentData.video = videoId;
+    if (postId) commentData.post = postId;
 
-    const populatedComment = await comment.populate(
-      "user",
-      "username image"
-    );
+    const comment = await Comment.create(commentData);
+    const populatedComment = await comment.populate("user", "username image");
 
     return NextResponse.json(populatedComment, { status: 201 });
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { error: "Failed to add comment" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to add comment" }, { status: 500 });
   }
 }

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { AppBar, Toolbar, IconButton, Typography, Button, Drawer, Box, List, ListItem, ListItemText, Avatar, Stack, Divider } from "@mui/material";
@@ -44,7 +43,7 @@ export default function Header() {
             <ListItem button onClick={() => signOut()}>
               <ListItemText primary="Sign Out" />
             </ListItem>
-            <ListItem button component={Link} href="/uploadfile">
+            <ListItem button component={Link} href="/UploadDialog">
               <CloudUploadIcon sx={{ mr: 1 }} />
               <ListItemText primary="Upload Video" />
             </ListItem>
@@ -57,7 +56,7 @@ export default function Header() {
             <ListItem button component={Link} href="/register">
               <ListItemText primary="Register" />
             </ListItem>
-            <ListItem button component={Link} href="/uploadfile">
+            <ListItem button component={Link} href="/UploadDialog">
               <CloudUploadIcon sx={{ mr: 1 }} />
               <ListItemText primary="Upload Video" />
             </ListItem>
@@ -95,7 +94,7 @@ export default function Header() {
                 <Button variant="contained" color="error" onClick={() => signOut()}>
                   Sign Out
                 </Button>
-                <Link href="/uploadfile" passHref>
+                <Link href="/UploadDialog" passHref>
                   <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
                     Upload Video
                   </Button>
@@ -113,7 +112,7 @@ export default function Header() {
                     Register
                   </Button>
                 </Link>
-                <Link href="/uploadfile" passHref>
+                <Link href="/UploadDialog" passHref>
                   <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
                     Upload Video
                   </Button>

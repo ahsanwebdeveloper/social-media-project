@@ -97,7 +97,7 @@ export default function Home() {
                 Sign Out
               </Button>
 
-              <Link href="/video" passHref>
+              <Link href="/feed" passHref>
                 <Button
                   variant="contained"
                   color="primary"

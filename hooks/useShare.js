@@ -1,39 +1,47 @@
-import { useState, useEffect } from "react";
-import { shareVideo } from "../services/share.service";
+import { useState } from "react";
+import { shareItem } from "../services/share.service";
 
-export default function useShare(initialShares = 0, videoId) {
+export default function useShare(initialShares = 0, videoId, postId) {
   const [sharesCount, setSharesCount] = useState(Number(initialShares) || 0);
 
   const handleShare = async () => {
-    if (!videoId) return;
+    if (!videoId && !postId) return;
 
-    const url = `${window.location.origin}/vide/${videoId}`;
+    let url = "";
+
+    if (videoId) {
+      url = `${window.location.origin}/video/${videoId}`;
+    } else if (postId) {
+      url = `${window.location.origin}/post/${postId}`;
+    }
 
     // Native share
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Check out this video!", url });
+        await navigator.share({
+          title: "Check this out!",
+          url,
+        });
       } catch {
-        return; // user canceled
+        return; // user cancelled
       }
     } else {
-      // fallback
       await navigator.clipboard.writeText(url);
-      alert("Video URL copied to clipboard!");
+      alert("URL copied to clipboard!");
     }
 
     // Optimistic update
-    setSharesCount((prev) => prev + 1);
+    setSharesCount(prev => prev + 1);
 
-    // Backend update
     try {
-      const data = await shareVideo(videoId);
-      const backendCount = Number(data.sharesCount);
-      if (!isNaN(backendCount)) setSharesCount(backendCount);
+      const data = await shareItem(videoId, postId);
+      if (!isNaN(Number(data.sharesCount))) {
+        setSharesCount(Number(data.sharesCount));
+      }
     } catch (err) {
       console.error(err);
       // rollback
-      setSharesCount((prev) => (prev > 0 ? prev - 1 : 0));
+      setSharesCount(prev => (prev > 0 ? prev - 1 : 0));
     }
   };
 

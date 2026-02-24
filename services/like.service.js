@@ -1,10 +1,10 @@
 // services/like.service.js
 
-export async function toggleLike(videoId) {
+export async function toggleLike(videoId, postId) {
   const res = await fetch("/api/like", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ videoId }),
+    body: JSON.stringify({ videoId, postId }),
   });
 
   const data = await res.json();
@@ -13,20 +13,18 @@ export async function toggleLike(videoId) {
   return data; // { liked: true | false }
 }
 
-export async function getLikeCount(videoId) {
+export async function getLikeCount(videoId, postId) {
   const res = await fetch(
-    `/api/like?videoId=${videoId}&type=count`
+    `/api/like?videoId=${videoId || ""}&postId=${postId || ""}&type=count`
   );
-
   if (!res.ok) throw new Error("Failed to fetch like count");
   return res.json(); // { count }
 }
 
-export async function isLikedByMe(videoId) {
+export async function isLikedByMe(videoId, postId) {
   const res = await fetch(
-    `/api/like?videoId=${videoId}&type=me`
+    `/api/like?videoId=${videoId || ""}&postId=${postId || ""}&type=me`
   );
-
   if (!res.ok) throw new Error("Failed to check like status");
-  return res.json(); // { liked }
+  return res.json(); // { liked: true | false }
 }
