@@ -68,7 +68,6 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "#F1F3F6",
       }}
     >
       <Box
@@ -105,6 +104,7 @@ export default function LoginPage() {
           onSubmit={handleSubmit(onSubmit)}
           sx={{
             width: { xs: "100%", md: "50%" },
+             borderRadius: 5,
             p: 4,
             bgcolor: "background.paper",
           }}

@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import Post from "@/models/post";
+import Video from "@/models/video";
 
 export async function GET(req) {
   try {
@@ -51,9 +53,22 @@ export async function POST(req) {
     if (postId) commentData.post = postId;
 
     const comment = await Comment.create(commentData);
-    const populatedComment = await comment.populate("user", "username image");
 
-    return NextResponse.json(populatedComment, { status: 201 });
+if (videoId) {
+  await Video.findByIdAndUpdate(videoId, {
+    $inc: { commentsCount: 1 },
+  });
+}
+
+if (postId) {
+  await Post.findByIdAndUpdate(postId, {
+    $inc: { commentsCount: 1 },
+  });
+}
+
+const populatedComment = await comment.populate("user", "username image");
+
+return NextResponse.json(populatedComment, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to add comment" }, { status: 500 });

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { AppBar, Toolbar, IconButton, Typography, Button, Drawer, Box, List, ListItem, ListItemText, Avatar, Stack, Divider } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Typography, Button, Drawer, Box, List, ListItem, ListItemText, Avatar, Stack, Divider,Dialog,DialogTitle,DialogContent,DialogActions } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -11,10 +11,15 @@ import Image from "next/image";
 import logo from "@/public/favicon.ico";
 import { useColorMode } from "@/app/theme-provider";
 
+
 export default function Header() {
   const { data: session, status } = useSession();
   const { toggleColorMode, mode } = useColorMode();
   const [mobileOpen, setMobileOpen] = useState(false);
+   const [openDialog, setOpenDialog] = useState(false);
+
+  const handleOpen = () => setOpenDialog(true);
+  const handleClose = () => setOpenDialog(false);
 
   if (status === "loading") return null;
 
@@ -40,27 +45,105 @@ export default function Header() {
                 <Typography>@{session.user.username}</Typography>
               </Stack>
             </ListItem>
-            <ListItem button onClick={() => signOut()}>
+            <ListItem button onClick={() => signOut()} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
               <ListItemText primary="Sign Out" />
             </ListItem>
-            <ListItem button component={Link} href="/UploadDialog">
-              <CloudUploadIcon sx={{ mr: 1 }} />
-              <ListItemText primary="Upload Video" />
-            </ListItem>
-          </>
+            <Divider/>
+            <ListItem button onClick={handleOpen}  sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
+        <CloudUploadIcon sx={{ mr: 1 }} />
+        <ListItemText primary="Upload Video" />
+      </ListItem>
+
+      {/* Dialog */}
+      <Dialog open={openDialog} onClose={handleClose} maxWidth="xs" fullWidth>
+        <DialogTitle>Upload Options</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <Link href="/postsupload" passHref legacyBehavior>
+              <Button
+                variant="contained"
+                fullWidth
+                color="primary"
+                onClick={handleClose}
+              >
+                Upload Post
+              </Button>
+            </Link>
+
+            <Link href="/uploadfile" passHref legacyBehavior>
+              <Button
+                variant="contained"
+                fullWidth
+                color="secondary"
+                sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+                onClick={handleClose}
+              >
+                Upload Video
+              </Button>
+            </Link>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="inherit">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+          
         ) : (
           <>
-            <ListItem button component={Link} href="/login">
-              <ListItemText primary="Login" />
+            <ListItem button component={Link} href="/login" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
+              <ListItemText primary="Login" sx={{color:"white"}} />
             </ListItem>
-            <ListItem button component={Link} href="/register">
-              <ListItemText primary="Register" />
+            <Divider/>
+            <ListItem button component={Link} href="/register" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
+              <ListItemText primary="Register" sx={{color:"white"}}/>
             </ListItem>
-            <ListItem button component={Link} href="/UploadDialog">
-              <CloudUploadIcon sx={{ mr: 1 }} />
-              <ListItemText primary="Upload Video" />
-            </ListItem>
-          </>
+              <Divider/>
+            <ListItem button onClick={handleOpen}  sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
+        <CloudUploadIcon sx={{ mr: 1 , color: "white" }} />
+        <ListItemText primary="Upload Video" sx={{color:"white"}} />
+      </ListItem>
+      <Divider/>
+      
+      
+      {/* Dialog */}
+      <Dialog open={openDialog} onClose={handleClose} maxWidth="xs" fullWidth>
+        <DialogTitle>Upload Options</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <Link href="/postsupload" passHref legacyBehavior>
+              <Button
+                variant="contained"
+                fullWidth
+                color="primary"
+                onClick={handleClose}
+              >
+                Upload Post
+              </Button>
+            </Link>
+
+            <Link href="/uploadfile" passHref legacyBehavior>
+              <Button
+                variant="contained"
+                fullWidth
+                color="secondary"
+                sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+                onClick={handleClose}
+              >
+                Upload Video
+              </Button>
+            </Link>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="inherit">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
         )}
       </List>
     </Box>
@@ -94,11 +177,50 @@ export default function Header() {
                 <Button variant="contained" color="error" onClick={() => signOut()}>
                   Sign Out
                 </Button>
-                <Link href="/UploadDialog" passHref>
-                  <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
-                    Upload Video
-                  </Button>
-                </Link>
+                 <Button
+      variant="contained"
+      startIcon={<CloudUploadIcon />}
+      sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+      onClick={handleOpen} 
+    >
+      Upload Video
+    </Button>
+
+    {/* Upload Dialog */}
+    <Dialog open={openDialog} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Upload Options</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} mt={1}>
+          <Link href="/postsupload" passHref legacyBehavior>
+            <Button
+              variant="contained"
+              fullWidth
+              color="primary"
+              onClick={handleClose}
+            >
+              Upload Post
+            </Button>
+          </Link>
+
+          <Link href="/uploadfile" passHref legacyBehavior>
+            <Button
+              variant="contained"
+              fullWidth
+              color="secondary"
+              sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+              onClick={handleClose}
+            >
+              Upload Video
+            </Button>
+          </Link>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="inherit">
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
               </>
             ) : (
               <>

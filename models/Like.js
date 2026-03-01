@@ -1,28 +1,42 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-const likeSchema = new Schema(
+const likeSchema = new mongoose.Schema(
   {
     user: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     video: {
-      type: Schema.Types.ObjectId,
-      ref: "video",
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Video",
+      default: null,
+    },
+    post: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      default: null,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
+
+likeSchema.pre("validate", function () {
+  if (!this.video && !this.post) {
+    throw new Error("Either video or post must be provided");
+  }
+});
 
 
 likeSchema.index(
-    { user: 1, video: 1 }, 
-    { unique: true }
+  { user: 1, video: 1 },
+  { unique: true, partialFilterExpression: { video: { $type: "objectId" } } }
 );
 
-const Like = mongoose.models.Like || mongoose.model("Like", likeSchema);
-export default Like;
+likeSchema.index(
+  { user: 1, post: 1 },
+  { unique: true, partialFilterExpression: { post: { $type: "objectId" } } }
+);
+
+export default mongoose.models.Like ||
+  mongoose.model("Like", likeSchema);

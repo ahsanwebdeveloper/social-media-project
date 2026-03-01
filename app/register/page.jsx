@@ -22,6 +22,7 @@ export default function Register() {
 
   const {
     register,
+    
     handleSubmit,
     formState: { errors },
     watch,
@@ -94,7 +95,6 @@ const watchUserName = watch("username", "");
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "#f5f5f5",
       }}
     >
       <Box

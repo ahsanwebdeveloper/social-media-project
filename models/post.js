@@ -14,10 +14,14 @@ const postSchema = new Schema(
     },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    postUrl: { type: String, default: "" }, // optional video URL
+    postUrl: { type: String, default: "" }, 
     controls: { type: Boolean, default: true },
     likesCount: { type: Number, default: 0 },
     sharesCount: { type: Number, default: 0 },
+    commentsCount: {
+  type: Number,
+  default: 0,
+},
     images: {
       type: [
         {
@@ -37,7 +41,6 @@ const postSchema = new Schema(
   { timestamps: true }
 );
 
-// Avoid OverwriteModelError in Next.js dev
 const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
 
 export default Post;

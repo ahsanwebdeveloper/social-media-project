@@ -18,8 +18,21 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await comment.deleteOne();
-    return NextResponse.json({ success: true });
+    if (comment.video) {
+  await Video.findByIdAndUpdate(comment.video, {
+    $inc: { commentsCount: -1 },
+  });
+}
+
+if (comment.post) {
+  await Post.findByIdAndUpdate(comment.post, {
+    $inc: { commentsCount: -1 },
+  });
+}
+
+await comment.deleteOne();
+
+return NextResponse.json({ success: true });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to delete comment" }, { status: 500 });
