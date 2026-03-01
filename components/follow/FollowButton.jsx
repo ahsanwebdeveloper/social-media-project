@@ -38,7 +38,7 @@ export default function FollowButton({ profileUserId }) {
       )}
 
       <Stack direction="row" spacing={1} alignItems="center">
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" >
           {followersCount} followers
         </Typography>
         <Typography variant="body2" color="text.secondary">
