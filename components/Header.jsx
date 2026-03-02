@@ -30,8 +30,8 @@ export default function Header() {
   const drawerWidth = 240;
 
   const drawer = (
-    <Box sx={{ width: drawerWidth }} role="presentation" onClick={handleDrawerToggle}>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ width: drawerWidth, borderRadius:2 }} role="presentation" onClick={handleDrawerToggle}>
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1, bgcolor: "#1D4ED8", color: "white", borderRadius: 2 }}>
         <Image src={logo} alt="AliReels Logo" width={40} height={40} style={{ borderRadius: 8 }} />
         <Typography variant="h6" noWrap>AliReels</Typography>
       </Box>
@@ -39,20 +39,27 @@ export default function Header() {
       <List>
         {session ? (
           <>
-            <ListItem button component={Link} href={`/profile/${session.user.id}`}>
+            <ListItem button component={Link} href={`/profile/${session.user.id}`} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Avatar src={session.user.image || "/default-avatar.png"} />
-                <Typography>@{session.user.username}</Typography>
+                <Typography sx={{color:"white"}}>@{session.user.username}</Typography>
               </Stack>
             </ListItem>
+              <Divider/>
             <ListItem button onClick={() => signOut()} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
-              <ListItemText primary="Sign Out" />
+              <ListItemText primary="Sign Out" sx={{color:"white"}} />
             </ListItem>
             <Divider/>
             <ListItem button onClick={handleOpen}  sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
-        <CloudUploadIcon sx={{ mr: 1 }} />
-        <ListItemText primary="Upload Video" />
+        <CloudUploadIcon sx={{ mr: 1, color:"white" }} />
+        <ListItemText primary="Upload Video" sx={{color:"white"}} />
       </ListItem>
+      <Divider/>
+       <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 , bgcolor: "#E50031", p: 1, borderRadius: 2, justifyContent: "center" ,"&:hover":{bgcolor: "#B0101F", cursor: "pointer", borderRadius: 2} }}>
+            <IconButton onClick={toggleColorMode} sx={{ color: "white" }}>
+              {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
+            </IconButton>
+          </Box>
 
       {/* Dialog */}
       <Dialog open={openDialog} onClose={handleClose} maxWidth="xs" fullWidth>
@@ -129,7 +136,7 @@ export default function Header() {
                 variant="contained"
                 fullWidth
                 color="secondary"
-                sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+                sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F", color: "white" } }}
                 onClick={handleClose}
               >
                 Upload Video
@@ -174,13 +181,13 @@ export default function Header() {
                     <Typography>@{session.user.username}</Typography>
                   </Stack>
                 </Link>
-                <Button variant="contained" color="error" onClick={() => signOut()}>
+                <Button variant="contained" onClick={() => signOut()} sx={{ bgcolor: "#E50031", color:"white", "&:hover": { bgcolor: "#B0101F", cursor: "pointer" , borderRadius: 2},borderRadius: 2 }}>
                   Sign Out
                 </Button>
                  <Button
       variant="contained"
-      startIcon={<CloudUploadIcon />}
-      sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+      startIcon={<CloudUploadIcon  sx={{color:"white"}}/>}
+      sx={{ bgcolor: "#E50031", color:"white", "&:hover": { bgcolor: "#B0101F", borderRadius: 2},borderRadius: 2 }}
       onClick={handleOpen} 
     >
       Upload Video
@@ -197,6 +204,7 @@ export default function Header() {
               fullWidth
               color="primary"
               onClick={handleClose}
+              sx={{color:"white"}}
             >
               Upload Post
             </Button>
@@ -207,7 +215,7 @@ export default function Header() {
               variant="contained"
               fullWidth
               color="secondary"
-              sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}
+              sx={{ bgcolor: "#E50031", color: "white", "&:hover": { bgcolor: "#B0101F" } }}
               onClick={handleClose}
             >
               Upload Video
@@ -225,17 +233,17 @@ export default function Header() {
             ) : (
               <>
                 <Link href="/login" passHref>
-                  <Button variant="contained" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                  <Button variant="contained" sx={{ bgcolor: "#E50031", color:"white", "&:hover": { bgcolor: "#B0101F" } }}>
                     Login
                   </Button>
                 </Link>
                 <Link href="/register" passHref>
-                  <Button variant="contained" sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                  <Button variant="contained" sx={{ bgcolor: "#E50031", color:"white", "&:hover": { bgcolor: "#B0101F" } }}>
                     Register
                   </Button>
                 </Link>
                 <Link href="/UploadDialog" passHref>
-                  <Button variant="contained" startIcon={<CloudUploadIcon />} sx={{ bgcolor: "#E50031", "&:hover": { bgcolor: "#B0101F" } }}>
+                  <Button variant="contained" startIcon={<CloudUploadIcon  sx={{color:"white"}}/>} sx={{ bgcolor: "#E50031", color:"white", "&:hover": { bgcolor: "#B0101F" } }}>
                     Upload Video
                   </Button>
                 </Link>

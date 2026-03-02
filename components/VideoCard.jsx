@@ -47,16 +47,15 @@ const VideoCard = ({ video }) => {
       ref={ref}
       sx={{
         width: { xs: "100%", sm: 400 },
-        height: { xs: "100%", sm: 700 },
+        height: { xs: "80%", sm: 700 },
         position: "relative",
-        margin: "auto",
       }}
     >
       <Card
         sx={{
           width: "100%",
           height: "100%",
-          borderRadius: { xs: 0, sm: 3 },
+          borderRadius: { xs: 3, sm: 3 },
           overflow: "hidden",
           backgroundColor: "black",
           position: "relative",

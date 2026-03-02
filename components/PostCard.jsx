@@ -27,7 +27,7 @@ const PostCard = ({ post }) => {
   const scrollRef = useRef(null);
   const { ref } = useInView({ threshold: 0.75 });
 
-  // ✅ FIXED: pass postId as second argument
+  // pass postId as second argument
   const { liked, likesCount, handleLike } = useLike(null, post._id);
 
   const { sharesCount, handleShare } = useShare(
@@ -51,19 +51,18 @@ const PostCard = ({ post }) => {
 
   return (
     <Box
-      ref={ref}
-      sx={{
-        width: { xs: "100%", sm: 400 },
-        height: { xs: "100%", sm: 700 },
-        position: "relative",
-        margin: "auto",
-      }}
-    >
+          ref={ref}
+          sx={{
+            width: { xs: "100%", sm: 400 },
+            height: { xs: "80%", sm: 700 },
+            position: "relative",
+          }}
+        >
       <Card
         sx={{
           width: "100%",
           height: "100%",
-          borderRadius: { xs: 0, sm: 3 },
+          borderRadius: { xs: 3, sm: 3 },
           overflow: "hidden",
           backgroundColor: "black",
           position: "relative",
