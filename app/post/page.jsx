@@ -52,6 +52,7 @@ const PostPage = () => {
         "&::-webkit-scrollbar": { display: "none" },
         msOverflowStyle: "none",
         scrollbarWidth: "none",
+      
       }}
     >
       <Grid container direction="column" alignItems="center" spacing={4}>

@@ -10,11 +10,15 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, useFieldArray } from "react-hook-form";
-import { uploadToCloudinary } from "@/lib/cloudinaryUpload"; // your cloudinary API helper
+import { uploadToCloudinary } from "@/lib/cloudinaryUpload";
 
 const CreatePostForm = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   const {
     register,
     handleSubmit,
@@ -33,12 +37,11 @@ const CreatePostForm = () => {
     name: "images",
   });
 
-  const [previewImages, setPreviewImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Handle Image Selection
-  const handleImageChange = async (e) => {
+  const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
 
     if (files.length + fields.length > 4) {
@@ -54,8 +57,6 @@ const CreatePostForm = () => {
         url: previewUrl,
         caption: "",
       });
-
-      setPreviewImages((prev) => [...prev, previewUrl]);
     });
   };
 
@@ -69,23 +70,23 @@ const CreatePostForm = () => {
     setError("");
 
     try {
-      // Upload images to Cloudinary
       const uploadedImages = [];
+
       for (let i = 0; i < data.images.length; i++) {
         const img = data.images[i];
-        const uploadRes = await uploadToCloudinary(img.file, "image"); // returns { secure_url }
+        const uploadRes = await uploadToCloudinary(img.file, "image");
+
         uploadedImages.push({
           url: uploadRes.secure_url,
           caption: img.caption || "",
         });
       }
 
-      // Prepare post data
       const postData = {
         title: data.title,
         description: data.description,
         images: uploadedImages,
-        postUrl: "", // optional, can handle video separately
+        postUrl: "",
       };
 
       const res = await fetch("/api/posts", {
@@ -120,6 +121,8 @@ const CreatePostForm = () => {
         p: 3,
         borderRadius: 3,
         boxShadow: 3,
+        bgcolor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       }}
     >
       <Typography variant="h5" mb={2}>
@@ -189,7 +192,7 @@ const CreatePostForm = () => {
                   position: "absolute",
                   top: 5,
                   right: 5,
-                  background: "#fff",
+                  bgcolor: isDark ? "#272727" : "#fff",
                 }}
               >
                 <DeleteIcon />
