@@ -108,11 +108,11 @@ const PostCard = ({ post }) => {
         <Box
           sx={{
             position: "absolute",
-            bottom: 120,
+            bottom: 150,
             left: "50%",
             transform: "translateX(-50%)",
             display: "flex",
-            gap: 1,
+            gap: 2,
           }}
         >
           {post.images?.map((_, index) => (
@@ -122,6 +122,7 @@ const PostCard = ({ post }) => {
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
+                gap: 2,
                 backgroundColor:
                   currentIndex === index ? "white" : "gray",
               }}
@@ -231,7 +232,8 @@ const PostCard = ({ post }) => {
             bottom: 0,
             width: "100%",
             height: "70%",
-            bgcolor: "white",
+           bgcolor: "background.paper",
+            opacity: 0.85,
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
             zIndex: 10,
