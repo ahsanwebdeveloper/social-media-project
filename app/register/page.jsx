@@ -1,7 +1,8 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import {
   TextField,
   Button,
@@ -19,38 +20,47 @@ export default function Register() {
   const [avatarSrc, setAvatarSrc] = useState(undefined);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const {
     register,
-    
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm({
-    mode:"onChange",
-  });
-const watchpassword = watch("password", "");
-const watchconfirmPassword = watch("confirmPassword", "");
-const passwordsMatch = watchpassword === watchconfirmPassword;
-const watchRegisterEamil = watch("email", "");
-const watchUserName = watch("username", "");
+  } = useForm({ mode: "onChange" });
+
+  const watchpassword = watch("password", "");
+  const watchconfirmPassword = watch("confirmPassword", "");
+  const passwordsMatch = watchpassword === watchconfirmPassword;
+  const watchEmail = watch("email", "");
+  const watchUsername = watch("username", "");
+
   useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/");
-    }
+    if (status === "authenticated") router.replace("/");
   }, [status, router]);
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setAvatarSrc(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const onSubmit = async (formData) => {
     setError("");
+    setSuccess("");
+    setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
     try {
+      // 1️⃣ Register user in DB
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,24 +76,28 @@ const watchUserName = watch("username", "");
 
       if (!res.ok) {
         setError(data?.error || "Registration failed");
+        setLoading(false);
         return;
       }
 
-      router.push("/login");
+      // 2️⃣ Auto send Magic Link
+      const magicRes = await signIn("email", {
+        redirect: false,
+        email: formData.email,
+      });
+
+      if (magicRes?.error) {
+        setError(magicRes.error);
+        setLoading(false);
+        return;
+      }
+
+      setSuccess("Registration successful! Check your email for Magic Link.");
     } catch (err) {
       console.error(err);
       setError("Registration failed");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAvatarChange = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setAvatarSrc(reader.result);
-      reader.readAsDataURL(file);
     }
   };
 
@@ -107,7 +121,6 @@ const watchUserName = watch("username", "");
           borderRadius: 5,
           overflow: "hidden",
           boxShadow: 4,
-          bgcolor: "#E50031",
           flexDirection: { xs: "column", md: "row" },
         }}
       >
@@ -124,7 +137,7 @@ const watchUserName = watch("username", "");
           }}
         >
           <Typography variant="h4" fontWeight="bold" textAlign="center">
-            Welcome to Register Form
+            Welcome to Register
           </Typography>
         </Box>
 
@@ -152,68 +165,67 @@ const watchUserName = watch("username", "");
               {error}
             </Alert>
           )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
-            Username:
-          </Typography>
           <TextField
             label="Username"
             fullWidth
             margin="dense"
-            {...register("username", { required: "Username is required", minLength: { value: 5, message: "Username must be at least 5 characters" } })}
-         error={!!errors.username}
-          helperText={errors.username ? errors.username.message : watchUserName && watchUserName.length < 5 ? "Username must be at least 5 characters" : ""}
+            {...register("username", {
+              required: "Username is required",
+              minLength: { value: 5, message: "Username must be at least 5 characters" },
+            })}
+            error={!!errors.username}
+            helperText={errors.username ? errors.username.message : ""}
           />
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
-            Email:
-          </Typography>
           <TextField
             label="Email"
             fullWidth
             margin="normal"
-            {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email address" } })}
-          error={!!errors.email}
-          helperText={errors.email ? errors.email.message : watchRegisterEamil && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchRegisterEamil) ? "Enter a valid email address" : ""}
+            {...register("email", {
+              required: "Email is required",
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" },
+            })}
+            error={!!errors.email}
+            helperText={errors.email ? errors.email.message : ""}
           />
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
-            Password:
-          </Typography>
           <TextField
             label="Password"
             type="password"
             fullWidth
             margin="normal"
-            {...register("password", { required: "Password is required", minLength: { value: 8, message: "Password must be at least 8 characters" } })}
-          error={!!errors.password}
-          helperText={errors.password ? errors.password.message : watchpassword && watchpassword.length < 8 ? "Password must be at least 8 characters" : ""}
+            {...register("password", {
+              required: "Password required",
+              minLength: { value: 8, message: "Password must be at least 8 characters" },
+            })}
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ""}
           />
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
-            Confirm password:
-          </Typography>
           <TextField
             label="Confirm Password"
             type="password"
             fullWidth
             margin="normal"
-            {...register("confirmPassword", { required: "Confirm Password is required", validate: value => value === watchpassword || "Passwords do not match" })}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword ? errors.confirmPassword.message : watchconfirmPassword && !passwordsMatch ? "Passwords do not match" : ""}
+            {...register("confirmPassword", {
+              required: "Confirm password required",
+              validate: (value) => value === watchpassword || "Passwords do not match",
+            })}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword ? errors.confirmPassword.message : ""}
           />
 
           {/* Avatar Upload */}
           <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <ButtonBase component="label">
               <Avatar src={avatarSrc} sx={{ width: 80, height: 80 }} />
-              <input
-              label="Avatar"
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleAvatarChange}
-              />
+              <input type="file" accept="image/*" hidden onChange={handleAvatarChange} />
             </ButtonBase>
           </Box>
 

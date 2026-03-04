@@ -1,11 +1,6 @@
 "use client";
 import { useState } from "react";
-import {
-  Box,
-  TextField,
-  IconButton,
-  Paper,
-} from "@mui/material";
+import { Box, TextField, IconButton, Paper } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 
 export default function CommentInput({ onSubmit }) {
@@ -25,7 +20,10 @@ export default function CommentInput({ onSubmit }) {
         alignItems: "center",
         p: 1,
         borderRadius: "999px",
+        bgcolor: "#B0101F", 
+        color: "white", 
         mt: 1,
+        backdropFilter: "blur(8px)",
       }}
     >
       <TextField
@@ -38,7 +36,10 @@ export default function CommentInput({ onSubmit }) {
         maxRows={3}
         InputProps={{
           disableUnderline: true,
-          sx: { ml: 1 },
+          sx: { ml: 1, color: "white" }, 
+        }}
+        InputLabelProps={{
+          sx: { color: "white" },
         }}
       />
 
@@ -46,7 +47,8 @@ export default function CommentInput({ onSubmit }) {
         onClick={handleSubmit}
         disabled={!text.trim()}
         sx={{
-          color: text.trim() ? "primary.main" : "grey.400",
+          color: text.trim() ? "primary.main" : "white",
+          cursor: text.trim() ? "pointer" : "not-allowed",
         }}
       >
         <SendIcon />
