@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
+
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
 
@@ -49,8 +49,6 @@ export async function POST(request) {
       profileImageUrl = result.secure_url;
     }
 
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // create email verification token
     const emailToken = crypto.randomBytes(32).toString("hex");
@@ -58,12 +56,12 @@ export async function POST(request) {
     // create user
     const user = await User.create({
       email,
-      password: hashedPassword,
+      password,
       username,
       image: profileImageUrl,
       emailToken,
       emailTokenExpires: Date.now() + 1000 * 60 * 60, // 1 hour
-      emailVerified: false,
+      emailVerified: true,
     });
 
     // send verification email

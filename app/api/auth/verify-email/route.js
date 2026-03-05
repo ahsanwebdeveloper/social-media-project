@@ -21,7 +21,8 @@ export async function GET(request) {
   user.emailVerified = true;
   user.emailToken = undefined;
   user.emailTokenExpires = undefined;
-  await user.save(); // important
+  await user.save();
 
-  return NextResponse.redirect("/login?verified=true"); // ✅ redirect to login
+  // ✅ redirect to login with query param
+  return NextResponse.redirect("/login?verified=true");
 }

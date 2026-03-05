@@ -14,14 +14,16 @@ export default function VerifyEmailPage() {
     fetch(`/api/auth/verify-email?token=${token}`)
       .then(res => {
         if (res.redirected) {
-          window.location.href = res.url; // redirect to login
+          // ✅ redirect directly to login page
+          window.location.href = res.url;
+        } else {
+          return res.json();
         }
-        return res.json().catch(() => ({}));
       })
       .then(data => {
-        if (data.success) {
+        if (data?.success) {
           setMessage("Email verified! You can now login.");
-        } else if (data.error) {
+        } else if (data?.error) {
           setMessage(data.error);
         }
       })
