@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
+import { type } from "node:os";
 
 const userSchema = new Schema(
   {
@@ -27,6 +28,17 @@ const userSchema = new Schema(
       type: String,
       required: true, 
     },
+    emailVerified: {
+       type: Boolean,
+        default: false 
+      },
+    emailToken: {
+    type: String,
+  },
+
+  emailTokenExpires: {
+    type: Date,
+  },
   },
   {
     timestamps: true, 

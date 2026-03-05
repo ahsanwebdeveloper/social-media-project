@@ -3,17 +3,14 @@ import cloudinary from "@/lib/cloudinary";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request) {
   try {
     await connectToDatabase();
 
-    const body = await request.json();
-
-    const email = body.email?.toLowerCase().trim();
-    const password = body.password?.trim();
-    const username = body.username?.trim();
-    const image = body.image;
+    const { email, password, username, image } = await request.json();
 
     if (!email || !password || !username) {
       return NextResponse.json(
@@ -22,6 +19,7 @@ export async function POST(request) {
       );
     }
 
+    // check username
     const existusername = await User.findOne({ username });
     if (existusername) {
       return NextResponse.json(
@@ -30,6 +28,7 @@ export async function POST(request) {
       );
     }
 
+    // check email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -39,30 +38,50 @@ export async function POST(request) {
     }
 
     let profileImageUrl = "";
+
+    // upload image
     if (image) {
       const result = await cloudinary.uploader.upload(image, {
         resource_type: "image",
         folder: "profile_images",
       });
+
       profileImageUrl = result.secure_url;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    // create email verification token
+    const emailToken = crypto.randomBytes(32).toString("hex");
+
+    // create user
+    const user = await User.create({
       email,
       password: hashedPassword,
       username,
       image: profileImageUrl,
-      emailVerified: new Date(),
+      emailToken,
+      emailTokenExpires: Date.now() + 1000 * 60 * 60, // 1 hour
+      emailVerified: false,
     });
 
+    // send verification email
+    await sendVerificationEmail(user.email, emailToken);
+
     return NextResponse.json(
-      { message: "User successfully register ho gaya" },
+      {
+        message:
+          "User register ho gaya. Please apni email verify karein.",
+      },
       { status: 201 }
     );
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Server error. Try again later." },
+      { status: 500 }
+    );
   }
 }

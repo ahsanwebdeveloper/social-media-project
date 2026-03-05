@@ -1,8 +1,7 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import {
   TextField,
   Button,
@@ -17,10 +16,10 @@ import { useForm } from "react-hook-form";
 export default function Register() {
   const router = useRouter();
   const { status } = useSession();
-  const [avatarSrc, setAvatarSrc] = useState(undefined);
+  const [avatarSrc, setAvatarSrc] = useState(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -29,38 +28,30 @@ export default function Register() {
     watch,
   } = useForm({ mode: "onChange" });
 
-  const watchpassword = watch("password", "");
-  const watchconfirmPassword = watch("confirmPassword", "");
-  const passwordsMatch = watchpassword === watchconfirmPassword;
+  const watchPassword = watch("password", "");
+  const watchConfirmPassword = watch("confirmPassword", "");
   const watchEmail = watch("email", "");
   const watchUsername = watch("username", "");
+  const passwordsMatch = watchPassword === watchConfirmPassword;
 
   useEffect(() => {
-    if (status === "authenticated") router.replace("/");
-  }, [status, router]);
-
-  const handleAvatarChange = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setAvatarSrc(reader.result);
-      reader.readAsDataURL(file);
+    if (status === "authenticated") {
+      router.replace("/");
     }
-  };
+  }, [status, router]);
 
   const onSubmit = async (formData) => {
     setError("");
     setSuccess("");
-    setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+
     try {
-      // 1️⃣ Register user in DB
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,166 +67,105 @@ export default function Register() {
 
       if (!res.ok) {
         setError(data?.error || "Registration failed");
-        setLoading(false);
         return;
       }
 
-      // 2️⃣ Auto send Magic Link
-      const magicRes = await signIn("email", {
-        redirect: false,
-        email: formData.email,
-      });
-
-      if (magicRes?.error) {
-        setError(magicRes.error);
-        setLoading(false);
-        return;
-      }
-
-      setSuccess("Registration successful! Check your email for Magic Link.");
+      setSuccess("Registration successful! Check your email to verify your account.");
     } catch (err) {
-      console.error(err);
+      console.error("REGISTER ERROR:", err);
       setError("Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setAvatarSrc(reader.result);
+    reader.readAsDataURL(file);
+  };
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "50vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <Box sx={{ width: "100%", minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{
-          width: "100%",
-          maxWidth: 900,
-          display: "flex",
-          borderRadius: 5,
-          overflow: "hidden",
-          boxShadow: 4,
-          flexDirection: { xs: "column", md: "row" },
-        }}
+        sx={{ width: "100%", maxWidth: 900, display: "flex", borderRadius: 5, overflow: "hidden", boxShadow: 4, bgcolor: "#E50031", flexDirection: { xs: "column", md: "row" } }}
       >
         {/* LEFT SIDE */}
-        <Box
-          sx={{
-            width: { xs: "100%", md: "50%" },
-            bgcolor: "#E50031",
-            color: "white",
-            display: { xs: "none", md: "flex" },
-            alignItems: "center",
-            justifyContent: "center",
-            p: 4,
-          }}
-        >
+        <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#E50031", color: "white", display: { xs: "none", md: "flex" }, alignItems: "center", justifyContent: "center", p: 4 }}>
           <Typography variant="h4" fontWeight="bold" textAlign="center">
-            Welcome to Register
+            Welcome to Register Form
           </Typography>
         </Box>
 
         {/* RIGHT SIDE */}
-        <Box
-          sx={{
-            width: { xs: "100%", md: "50%" },
-            p: 4,
-            borderRadius: 5,
-            bgcolor: "background.paper",
-          }}
-        >
-          <Typography
-            variant="h5"
-            mb={2}
-            textAlign="center"
-            fontWeight="bold"
-            color="primary"
-          >
+        <Box sx={{ width: { xs: "100%", md: "50%" }, p: 4, borderRadius: 5, bgcolor: "background.paper" }}>
+          <Typography variant="h5" mb={2} textAlign="center" fontWeight="bold" color="primary">
             Register
           </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {success}
-            </Alert>
-          )}
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
+          {/* Username */}
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Username:</Typography>
           <TextField
             label="Username"
             fullWidth
             margin="dense"
-            {...register("username", {
-              required: "Username is required",
-              minLength: { value: 5, message: "Username must be at least 5 characters" },
-            })}
+            {...register("username", { required: "Username is required", minLength: { value: 5, message: "Username must be at least 5 characters" } })}
             error={!!errors.username}
-            helperText={errors.username ? errors.username.message : ""}
+            helperText={errors.username ? errors.username.message : watchUsername && watchUsername.length < 5 ? "Username must be at least 5 characters" : ""}
           />
 
+          {/* Email */}
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Email:</Typography>
           <TextField
             label="Email"
             fullWidth
             margin="normal"
-            {...register("email", {
-              required: "Email is required",
-              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" },
-            })}
+            {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email address" } })}
             error={!!errors.email}
-            helperText={errors.email ? errors.email.message : ""}
+            helperText={errors.email ? errors.email.message : watchEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail) ? "Enter a valid email address" : ""}
           />
 
+          {/* Password */}
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Password:</Typography>
           <TextField
             label="Password"
             type="password"
             fullWidth
             margin="normal"
-            {...register("password", {
-              required: "Password required",
-              minLength: { value: 8, message: "Password must be at least 8 characters" },
-            })}
+            {...register("password", { required: "Password is required", minLength: { value: 8, message: "Password must be at least 8 characters" } })}
             error={!!errors.password}
-            helperText={errors.password ? errors.password.message : ""}
+            helperText={errors.password ? errors.password.message : watchPassword && watchPassword.length < 8 ? "Password must be at least 8 characters" : ""}
           />
 
+          {/* Confirm Password */}
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Confirm password:</Typography>
           <TextField
             label="Confirm Password"
             type="password"
             fullWidth
             margin="normal"
-            {...register("confirmPassword", {
-              required: "Confirm password required",
-              validate: (value) => value === watchpassword || "Passwords do not match",
-            })}
+            {...register("confirmPassword", { required: "Confirm Password is required", validate: (value) => value === watchPassword || "Passwords do not match" })}
             error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword ? errors.confirmPassword.message : ""}
+            helperText={errors.confirmPassword ? errors.confirmPassword.message : watchConfirmPassword && !passwordsMatch ? "Passwords do not match" : ""}
           />
 
           {/* Avatar Upload */}
           <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <ButtonBase component="label">
-              <Avatar src={avatarSrc} sx={{ width: 80, height: 80 }} />
+              <Avatar src={avatarSrc || ""} sx={{ width: 80, height: 80 }} />
               <input type="file" accept="image/*" hidden onChange={handleAvatarChange} />
             </ButtonBase>
           </Box>
 
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
-            disabled={loading}
-          >
+          {/* Submit */}
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
             {loading ? "Registering..." : "Register"}
           </Button>
 

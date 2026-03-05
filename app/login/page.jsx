@@ -1,15 +1,8 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-} from "@mui/material";
+import { signIn, useSession } from "next-auth/react";
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 import { useForm } from "react-hook-form";
 
 export default function LoginPage() {
@@ -17,43 +10,25 @@ export default function LoginPage() {
   const { status } = useSession();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [magicSent, setMagicSent] = useState("");
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ mode: "onChange" });
+  const { register, handleSubmit, formState: { errors }, watch } = useForm({ mode: "onChange" });
   const watchEmail = watch("email", "");
   const watchPassword = watch("password", "");
 
-  useEffect(() => {
-    if (status === "authenticated") router.replace("/");
-  }, [status, router]);
+  useEffect(() => { if (status === "authenticated") router.replace("/"); }, [status, router]);
 
-  const handleCredentials = async (formData) => {
-    setError("");
-    setLoading(true);
-
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: formData.email,
-      password: formData.password,
-    });
-
+  const onSubmit = async (formData) => {
+    setError(""); setLoading(true);
+    const res = await signIn("credentials", { redirect: false, email: formData.email, password: formData.password });
     setLoading(false);
 
-    if (res?.error) setError(res.error);
-    else router.replace("/");
-  };
+    if (res?.error) {
+      if (res.error.includes("verify your email")) setError("You need to verify your email before logging in.");
+      else setError(res.error);
+      return;
+    }
 
-  const handleMagicLink = async () => {
-    setError("");
-    setMagicSent("");
-    setLoading(true);
-
-    const res = await signIn("email", { redirect: false, email: watchEmail });
-
-    setLoading(false);
-
-    if (res?.error) setError(res.error);
-    else setMagicSent("Magic Link sent! Check your email.");
+    router.replace("/");
   };
 
   if (status === "loading") return <div>Loading...</div>;
@@ -61,27 +36,28 @@ export default function LoginPage() {
   return (
     <Box sx={{ width: "100%", minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ width: "100%", maxWidth: 900, display: "flex", borderRadius: 5, overflow: "hidden", boxShadow: 4, flexDirection: { xs: "column", md: "row" } }}>
-        {/* LEFT */}
+        {/* LEFT SIDE */}
         <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#E50031", color: "white", display: { xs: "none", md: "flex" }, alignItems: "center", justifyContent: "center", p: 4 }}>
           <Typography variant="h4" fontWeight="bold" textAlign="center">Welcome Back</Typography>
         </Box>
 
-        {/* RIGHT */}
-        <Box component="form" onSubmit={handleSubmit(handleCredentials)} sx={{ width: { xs: "100%", md: "50%" }, borderRadius: 5, p: 4, bgcolor: "background.paper" }}>
+        {/* RIGHT SIDE */}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { xs: "100%", md: "50%" }, borderRadius: 5, p: 4, bgcolor: "background.paper" }}>
           <Typography variant="h5" mb={2} textAlign="center" fontWeight="bold" color="primary">Login</Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {magicSent && <Alert severity="success" sx={{ mb: 2 }}>{magicSent}</Alert>}
 
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Email:</Typography>
           <TextField
             label="Email"
             fullWidth
             margin="dense"
-            {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" } })}
+            {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email address" } })}
             error={!!errors.email}
-            helperText={errors.email ? errors.email.message : ""}
+            helperText={errors.email ? errors.email.message : watchEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail) ? "Enter a valid email address" : ""}
           />
 
+          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5, mt: 1 }}>Password:</Typography>
           <TextField
             label="Password"
             type="password"
@@ -89,16 +65,11 @@ export default function LoginPage() {
             margin="dense"
             {...register("password", { required: "Password is required", minLength: { value: 8, message: "Password must be at least 8 characters" } })}
             error={!!errors.password}
-            helperText={errors.password ? errors.password.message : ""}
+            helperText={errors.password ? errors.password.message : watchPassword && watchPassword.length < 8 ? "Password must be at least 8 characters" : ""}
           />
 
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
-          </Button>
-
-          {/* Magic Link button */}
-          <Button variant="outlined" fullWidth sx={{ mt: 2 }} onClick={handleMagicLink} disabled={!watchEmail || loading}>
-            Send Magic Link
           </Button>
 
           <Typography variant="body2" textAlign="center" mt={2}>
