@@ -17,12 +17,12 @@ export async function GET(request) {
 
   if (!user) return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
 
-  // ✅ mark email as verified
+  //  mark email as verified
   user.emailVerified = true;
   user.emailToken = undefined;
   user.emailTokenExpires = undefined;
   await user.save();
 
-  // ✅ redirect to login with query param
+  //  redirect to login with query param
   return NextResponse.redirect("/login?verified=true");
 }
