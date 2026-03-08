@@ -19,8 +19,9 @@ export default function useFollow(profileUserId) {
         setFollowersCount(followers.length);
 
         if (session?.user?.id) {
+          // ✅ Safe check for null follower objects
           const followed = followers.some(
-            f => f.follower._id === session.user.id
+            f => f.follower?._id === session.user.id
           );
           setIsFollowing(followed);
         }
@@ -29,14 +30,14 @@ export default function useFollow(profileUserId) {
         setFollowingCount(following.length);
 
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch follow data:", err);
       }
     };
 
     fetchData();
   }, [profileUserId, session?.user?.id]);
 
-  //  TOGGLE FOLLOW / UNFOLLOW
+  // TOGGLE FOLLOW / UNFOLLOW
   const toggleFollow = async () => {
     if (!session?.user?.id) return;
     setLoading(true);
@@ -48,7 +49,7 @@ export default function useFollow(profileUserId) {
         data.following ? prev + 1 : prev - 1
       );
     } catch (err) {
-      console.error(err);
+      console.error("Failed to toggle follow:", err);
     } finally {
       setLoading(false);
     }
