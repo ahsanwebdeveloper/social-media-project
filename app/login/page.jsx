@@ -12,22 +12,34 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm({ mode: "onChange" });
-  const watchEmail = watch("email", "");
-  const watchPassword = watch("password", "");
 
-  useEffect(() => { if (status === "authenticated") router.replace("/"); }, [status, router]);
+  useEffect(() => {
+    if (status === "authenticated") router.replace("/");
+  }, [status, router]);
 
   const onSubmit = async (formData) => {
-    setError(""); setLoading(true);
-    const res = await signIn("credentials", { redirect: false, email: formData.email, password: formData.password });
-    setLoading(false);
+    setError(""); 
+    setLoading(true);
 
-    if (res?.error) {
-      if (res.error.includes("verify your email")) setError("You need to verify your email before logging in.");
-      else setError(res.error);
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    // Redirect unverified users to verify page
+    if (res?.ok && res?.notVerified) {
+      router.push(`/verify?email=${res.email}`);
       return;
     }
 
+    if (res?.error) {
+      setError(res.error);
+      setLoading(false);
+      return;
+    }
+
+    // login successful
     router.replace("/");
   };
 
@@ -36,6 +48,7 @@ export default function LoginPage() {
   return (
     <Box sx={{ width: "100%", minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ width: "100%", maxWidth: 900, display: "flex", borderRadius: 5, overflow: "hidden", boxShadow: 4, flexDirection: { xs: "column", md: "row" } }}>
+        
         {/* LEFT SIDE */}
         <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#E50031", color: "white", display: { xs: "none", md: "flex" }, alignItems: "center", justifyContent: "center", p: 4 }}>
           <Typography variant="h4" fontWeight="bold" textAlign="center">Welcome Back</Typography>
@@ -47,25 +60,24 @@ export default function LoginPage() {
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Email:</Typography>
           <TextField
             label="Email"
             fullWidth
             margin="dense"
-            {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email address" } })}
+            {...register("email", { required: "Email is required" })}
             error={!!errors.email}
-            helperText={errors.email ? errors.email.message : watchEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail) ? "Enter a valid email address" : ""}
+            helperText={errors.email ? errors.email.message : ""}
           />
 
-          <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5, mt: 1 }}>Password:</Typography>
           <TextField
             label="Password"
             type="password"
             fullWidth
             margin="dense"
-            {...register("password", { required: "Password is required", minLength: { value: 8, message: "Password must be at least 8 characters" } })}
+            {...register("password", { required: "Password is required" })}
             error={!!errors.password}
-            helperText={errors.password ? errors.password.message : watchPassword && watchPassword.length < 8 ? "Password must be at least 8 characters" : ""}
+            helperText={errors.password ? errors.password.message : ""}
+            sx={{ mt: 1 }}
           />
 
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>

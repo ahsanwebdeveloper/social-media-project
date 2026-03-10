@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
-
-import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request) {
@@ -49,9 +47,8 @@ export async function POST(request) {
       profileImageUrl = result.secure_url;
     }
 
-
-    // create email verification token
-    const emailToken = crypto.randomBytes(32).toString("hex");
+    // ⭐ generate 6 digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // create user
     const user = await User.create({
@@ -59,18 +56,17 @@ export async function POST(request) {
       password,
       username,
       image: profileImageUrl,
-      emailToken,
-      emailTokenExpires: Date.now() + 1000 * 60 * 60, // 1 hour
-      emailVerified: true,
+      verificationCode: code,
+      verificationCodeExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
+      isVerified: false,
     });
 
     // send verification email
-    await sendVerificationEmail(user.email, emailToken);
+    await sendVerificationEmail(user.email, code);
 
     return NextResponse.json(
       {
-        message:
-          "User register ho gaya. Please apni email verify karein.",
+        message: "User register ho gaya. Please apni email verify karein.",
       },
       { status: 201 }
     );

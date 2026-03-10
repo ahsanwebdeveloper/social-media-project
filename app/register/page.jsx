@@ -34,12 +34,14 @@ export default function Register() {
   const watchUsername = watch("username", "");
   const passwordsMatch = watchPassword === watchConfirmPassword;
 
+  //  If user is already logged in, redirect to home
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/");
     }
   }, [status, router]);
 
+  // Register page onSubmit
   const onSubmit = async (formData) => {
     setError("");
     setSuccess("");
@@ -70,10 +72,15 @@ export default function Register() {
         return;
       }
 
-      setSuccess("Registration successful! Check your email to verify your account.");
+      //  Success: redirect to verify page directly
+      setSuccess("Registration successful! Redirecting to email verification...");
+      setTimeout(() => {
+      router.push(`/verify?email=${formData.email}`);
+      }, 1000);
+
     } catch (err) {
       console.error("REGISTER ERROR:", err);
-      setError("Registration failed");
+      setError("Registration failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -110,7 +117,6 @@ export default function Register() {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-          {/* Username */}
           <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Username:</Typography>
           <TextField
             label="Username"
@@ -121,7 +127,6 @@ export default function Register() {
             helperText={errors.username ? errors.username.message : watchUsername && watchUsername.length < 5 ? "Username must be at least 5 characters" : ""}
           />
 
-          {/* Email */}
           <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Email:</Typography>
           <TextField
             label="Email"
@@ -132,7 +137,6 @@ export default function Register() {
             helperText={errors.email ? errors.email.message : watchEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchEmail) ? "Enter a valid email address" : ""}
           />
 
-          {/* Password */}
           <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Password:</Typography>
           <TextField
             label="Password"
@@ -144,7 +148,6 @@ export default function Register() {
             helperText={errors.password ? errors.password.message : watchPassword && watchPassword.length < 8 ? "Password must be at least 8 characters" : ""}
           />
 
-          {/* Confirm Password */}
           <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>Confirm password:</Typography>
           <TextField
             label="Confirm Password"
@@ -156,7 +159,6 @@ export default function Register() {
             helperText={errors.confirmPassword ? errors.confirmPassword.message : watchConfirmPassword && !passwordsMatch ? "Passwords do not match" : ""}
           />
 
-          {/* Avatar Upload */}
           <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <ButtonBase component="label">
               <Avatar src={avatarSrc || ""} sx={{ width: 80, height: 80 }} />
@@ -164,7 +166,6 @@ export default function Register() {
             </ButtonBase>
           </Box>
 
-          {/* Submit */}
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
             {loading ? "Registering..." : "Register"}
           </Button>
