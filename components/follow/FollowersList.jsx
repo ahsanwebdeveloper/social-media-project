@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Stack, Avatar, Typography, Button } from "@mui/material";
-import useFollow from "@/hooks/useFollow"; // your follow/unfollow hook
-import { getFollowers } from "@/services/follow.service"; // API call to fetch followers
+import useFollow from "@/hooks/useFollow"; 
+import { getFollowers } from "@/services/follow.service"; 
 
 export default function FollowerList({ userId }) {
   const [followers, setFollowers] = useState([]);
@@ -10,7 +10,7 @@ export default function FollowerList({ userId }) {
   useEffect(() => {
     const fetchFollowers = async () => {
       try {
-        const data = await getFollowers(userId); // fetch followers array
+        const data = await getFollowers(userId); 
         setFollowers(data);
       } catch (err) {
         console.error(err);

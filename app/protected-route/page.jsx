@@ -6,7 +6,7 @@ export default async function ProtectedPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    return redirect("/login"); // from "next/navigation"
+    return redirect("/login"); 
   }
 
   return <div>Welcome, {session.user.username}</div>;

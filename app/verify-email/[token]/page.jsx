@@ -14,7 +14,7 @@ export default function VerifyEmailPage() {
     fetch(`/api/auth/verify-email?token=${token}`)
       .then(res => {
         if (res.redirected) {
-          // ✅ redirect directly to login page
+          //  redirect directly to login page
           window.location.href = res.url;
         } else {
           return res.json();

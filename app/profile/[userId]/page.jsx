@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
@@ -36,7 +35,7 @@ export default function ProfilePage() {
     setLoadingVideos(true);
     setLoadingPosts(true);
 
-    /* ================= FETCH USER ================= */
+    /*  FETCH USER  */
     fetch(`/api/users/${userId}`)
       .then((res) => {
         if (!res.ok) throw new Error("User fetch failed");
@@ -46,7 +45,7 @@ export default function ProfilePage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoadingUser(false));
 
-    /* ================= FETCH VIDEOS ================= */
+    /*  FETCH VIDEOS */
     fetch(`/api/videos?userId=${userId}&page=1&limit=50`)
       .then((res) => {
         if (!res.ok) throw new Error("Videos fetch failed");
@@ -56,7 +55,7 @@ export default function ProfilePage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoadingVideos(false));
 
-    /* ================= FETCH POSTS ================= */
+    /*  FETCH POSTS  */
     fetch(`/api/posts?userId=${userId}&page=1&limit=50`)
       .then((res) => {
         if (!res.ok) throw new Error("Posts fetch failed");
@@ -74,7 +73,7 @@ export default function ProfilePage() {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, sm: 4 }, py: 4 }}>
 
-      {/* ================= PROFILE HEADER ================= */}
+      {/*  PROFILE HEADER  */}
       <Box
         sx={{
           display: "flex",
@@ -124,7 +123,7 @@ export default function ProfilePage() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* ================= TABS ================= */}
+      {/*  TABS  */}
       <Tabs
         value={tab}
         onChange={(e, newValue) => setTab(newValue)}
@@ -137,9 +136,9 @@ export default function ProfilePage() {
         <Tab label="Posts" />
       </Tabs>
 
-      {/* ================= CONTENT ================= */}
+      {/* CONTENT  */}
 
-      {/* ===== REELS TAB ===== */}
+      {/* REELS TAB  */}
       {tab === 0 && (
         <>
           {loadingVideos ? (
@@ -163,7 +162,7 @@ export default function ProfilePage() {
         </>
       )}
 
-      {/* ===== POSTS TAB ===== */}
+      {/* POSTS TAB */}
       {tab === 1 && (
         <>
           {loadingPosts ? (
