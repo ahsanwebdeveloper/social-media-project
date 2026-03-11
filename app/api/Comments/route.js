@@ -11,14 +11,19 @@ export async function GET(req) {
     await connectToDatabase();
 
     const { searchParams } = new URL(req.url);
+
     const videoId = searchParams.get("videoId");
     const postId = searchParams.get("postId");
 
     if (!videoId && !postId) {
-      return NextResponse.json({ error: "videoId or postId required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "videoId or postId required" },
+        { status: 400 }
+      );
     }
 
     const query = {};
+
     if (videoId) query.video = videoId;
     if (postId) query.post = postId;
 
@@ -27,9 +32,13 @@ export async function GET(req) {
       .sort({ createdAt: -1 });
 
     return NextResponse.json(comments);
+
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
+    console.error("COMMENT FETCH ERROR:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch comments" },
+      { status: 500 }
+    );
   }
 }
 

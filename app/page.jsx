@@ -1,10 +1,12 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Box, Button, Typography, Container } from "@mui/material";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   if (status === "loading") {
     return (
@@ -67,15 +69,26 @@ export default function Home() {
           Welcome to AliReels
         </Typography>
 
-        {session && (
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ fontSize: { xs: 14, sm: 16, md: 18 } }}
-          >
-            Signed in as: {session.user?.email}
-          </Typography>
-        )}
+       {session && (
+  <Typography
+    variant="h6"
+    gutterBottom
+    sx={{ fontSize: { xs: 14, sm: 16, md: 18 }, cursor: "pointer" }}
+    onClick={() => {
+      if (!session.user?.isVerified) {
+        router.push(`/verify?email=${session.user?.email}`);
+      }
+    }}
+  >
+    Signed in as: {session.user?.email}
+
+    {!session.user?.isVerified && (
+      <span style={{ color: "red", marginLeft: "8px", fontSize: "14px" }}>
+        (Please verify)
+      </span>
+    )}
+  </Typography>
+)}
 
         <Box
           sx={{

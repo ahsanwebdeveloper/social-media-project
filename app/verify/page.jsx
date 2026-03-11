@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TextField, Button, Box, Typography, Alert } from "@mui/material";
 
@@ -8,13 +7,38 @@ export default function VerifyPage() {
   const params = useSearchParams();
   const router = useRouter();
 
-  // Decode email from URL
   const email = params.get("email") ? decodeURIComponent(params.get("email")) : null;
 
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  //  check if user already verified
+  useEffect(() => {
+    const checkUser = async () => {
+      if (!email) return;
+
+      try {
+        const res = await fetch("/api/auth/check-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json();
+
+        if (data.verified) {
+          router.replace("/login"); // redirect if already verified
+        }
+
+      } catch (err) {
+        console.log("CHECK VERIFY ERROR:", err);
+      }
+    };
+
+    checkUser();
+  }, [email, router]);
 
   const verify = async () => {
     if (!email) {
@@ -44,10 +68,10 @@ export default function VerifyPage() {
         return;
       }
 
-      setSuccess("Email verified successfully! Redirecting to login...");
+      setSuccess("Email verified successfully! Redirecting...");
 
       setTimeout(() => {
-        router.push("/login");
+        router.replace("/");
       }, 1500);
 
     } catch (err) {
@@ -67,7 +91,9 @@ export default function VerifyPage() {
           We sent a code to <strong>{email}</strong>
         </Typography>
       ) : (
-        <Alert severity="error" sx={{ mb: 2 }}>Invalid verification link.</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Invalid verification link.
+        </Alert>
       )}
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
